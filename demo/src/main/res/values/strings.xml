@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">QQMusicApiDemo</string>
+    <string name="title_activity_qrcode">QRCodeActivity</string>
+</resources>
