@@ -4,10 +4,10 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '28.0.2'
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId ""
+        applicationId "com.tencent.qqmusic.api.demo"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
@@ -30,7 +30,7 @@ dependencies {
         exclude module: 'support-v4'
     }
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
-    implementation(name: 'qqmusic-innovation-aidl-api-sdk-1.0.2', ext: 'aar')
+    implementation(name: 'qqmusic-innovation-aidl-api-sdk-1.0.3', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.41"
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.2.41"
