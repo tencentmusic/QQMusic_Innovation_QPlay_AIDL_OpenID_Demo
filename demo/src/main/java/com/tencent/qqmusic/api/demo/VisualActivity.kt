@@ -20,8 +20,10 @@ import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import com.google.gson.Gson
 import com.google.gson.JsonParser
+import com.tencent.qqmusic.api.demo.Config.BIND_PLATFORM
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
 import com.tencent.qqmusic.third.api.contract.*
+import com.tencent.qqmusic.third.api.contract.CommonCmd.*
 import org.json.JSONObject
 import org.json.JSONTokener
 import java.io.BufferedReader
@@ -100,7 +102,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 22 -> {
-                    val bindRet = bindQQMusicApiService()
+                    val bindRet = bindQQMusicApiService(BIND_PLATFORM)
                     Log.i("VisualActivity", "bindRet:" + bindRet)
                     if (!bindRet) {
                         sendEmptyMessageDelayed(22, 100)
@@ -248,10 +250,22 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     /**
      * 绑定QQ音乐API服务
      */
-    private fun bindQQMusicApiService(): Boolean {
+    private fun bindQQMusicApiService(platform:String): Boolean {
         // 必须显式绑定
-        val intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
-        intent.`package` = "com.tencent.qqmusic"
+        when(platform){
+            AIDL_PLATFORM_TYPE_PHONE -> {
+                val intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
+                intent.`package` = "com.tencent.qqmusic"}
+            AIDL_PLATFORM_TYPE_CAR -> {
+                val intent = Intent("com.tencent.qqmusiccar.third.api.QQMusicApiService")
+                intent.`package` = "com.tencent.qqmusiccar"}
+            AIDL_PLATFORM_TYPE_TV -> {
+                val intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
+                intent.`package` = "com.tencent.qqmusictv"}
+            else -> {
+                Log.e(TAG,"platform error!",RuntimeException())
+            }
+        }
         return bindService(intent, this, Context.BIND_AUTO_CREATE)
     }
 
@@ -300,7 +314,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     fun onActiveClick(view: View) {
-        val bindRet = bindQQMusicApiService()
+        val bindRet = bindQQMusicApiService(BIND_PLATFORM)
         if (!bindRet) {
             txtResult.text = "连接QQ音乐失败"
             myTherad()
