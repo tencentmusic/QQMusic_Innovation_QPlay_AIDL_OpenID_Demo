@@ -226,7 +226,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         txtResult.text = "已连接QQ音乐"
         bindFlag = true
         Log.d(TAG, "service has connected")
-        CommonCmd.init(CommonCmd.AIDL_PLATFORM_TYPE_PHONE)
+        CommonCmd.init(BIND_PLATFORM)
         sayHi()
     }
 

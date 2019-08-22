@@ -18,7 +18,7 @@ public static final String BIND_PLATFORM = "";
 applicationId ""
 ```
 
-请一定注意：**上述四个数值一定来自OpenID业务，不要与OpenAPI业务混淆**。
+请一定注意：**上述三个数值（除BIND_PLATFORM）一定来自OpenID业务，不要与OpenAPI业务混淆**。
 
 ### 如何运行
 
