@@ -9,6 +9,7 @@
 ```java
 public static final String OPENID_APPID = "";
 public static final String OPENID_APP_PRIVATE_KEY = "";
+public static final String BIND_PLATFORM = "";
 ```
 
 请在`build.gradle`中修改如下变量：
@@ -17,7 +18,7 @@ public static final String OPENID_APP_PRIVATE_KEY = "";
 applicationId ""
 ```
 
-请一定注意：**上述三个数值一定来自OpenID业务，不要与OpenAPI业务混淆**。
+请一定注意：**上述三个数值（除BIND_PLATFORM）一定来自OpenID业务，不要与OpenAPI业务混淆**。
 
 ### 如何运行
 
