@@ -251,16 +251,17 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
      * 绑定QQ音乐API服务
      */
     private fun bindQQMusicApiService(platform:String): Boolean {
+        var intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
         // 必须显式绑定
         when(platform){
             AIDL_PLATFORM_TYPE_PHONE -> {
-                val intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
+                intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
                 intent.`package` = "com.tencent.qqmusic"}
             AIDL_PLATFORM_TYPE_CAR -> {
-                val intent = Intent("com.tencent.qqmusiccar.third.api.QQMusicApiService")
+                intent = Intent("com.tencent.qqmusiccar.third.api.QQMusicApiService")
                 intent.`package` = "com.tencent.qqmusiccar"}
             AIDL_PLATFORM_TYPE_TV -> {
-                val intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
+                intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
                 intent.`package` = "com.tencent.qqmusictv"}
             else -> {
                 Log.e(TAG,"platform error!",RuntimeException())
