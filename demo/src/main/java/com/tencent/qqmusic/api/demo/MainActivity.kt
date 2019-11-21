@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.*
 import com.tencent.qqmusic.third.api.contract.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 @SuppressLint("SetTextI18n")
 class MainActivity : Activity(), ServiceConnection {
@@ -83,6 +84,12 @@ class MainActivity : Activity(), ServiceConnection {
             } else if (actionText.text.toString() == "setPlayMode") {
                 paramsKeyText.setText("playMode")
                 paramsText.setText("0")
+            } else if (actionText.text.toString() == "voicePlay") {
+                paramsKeyText.setText("query;slotList")
+                paramsText.setText("我想听周杰伦的七里香\nsinger=周杰伦\nsong=七里香")
+            } else if (actionText.text.toString() == "voiceShortcut") {
+                paramsKeyText.setText("intent")
+                paramsText.setText("favorite")
             }
         }
 
@@ -126,9 +133,23 @@ class MainActivity : Activity(), ServiceConnection {
                             putString(params[i], paramsText.text.lines()[i])
                         }
                     }
+                } else if(paramsKeyText.text.toString().contains(";")) {
+                    val params = paramsKeyText.text.toString().split(";")
+                    val slotList = ArrayList<String>()
+                    for (i in 0..(params.size - 1)) {
+                        if (params[i] == "query") {
+                            putString(params[i], paramsText.text.lines()[i])
+                        } else {
+                            slotList.add(paramsText.text.lines()[i])
+                            slotList.add(paramsText.text.lines()[i+1])
+                        }
+                    }
+                    putStringArrayList(params[1], slotList)
                 } else {
                     if (paramsKeyText.text.toString() == "page") {
                         putInt(paramsKeyText.text.toString(), paramsText.text.lines()[0].toInt())
+                    } else if(paramsKeyText.text.toString() == "intent") {
+                        putString(paramsKeyText.text.toString(), paramsText.text.lines()[0])
                     } else {
                         putStringArrayList(paramsKeyText.text.toString(), ArrayList(paramsText.text.lines()))
                     }
@@ -253,7 +274,9 @@ class MainActivity : Activity(), ServiceConnection {
                 "isQQMusicForeground",
                 "getLoginState",
                 "seekForward",
-                "seekBack"
+                "seekBack",
+                "voicePlay",
+                "voiceShortcut"
         )
     }
 }
