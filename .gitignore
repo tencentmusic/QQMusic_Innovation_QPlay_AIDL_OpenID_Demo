@@ -1,4 +1,9 @@
+*.iml
 /gradle/*
 /gradlew
 /gradlew.bat
 gradle.properties
+.idea
+.gradle
+/build
+demo/build
