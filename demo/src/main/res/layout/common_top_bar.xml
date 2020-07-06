@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/relative_top_bar"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="40dp"
     android:background="@color/colorPrimary"
@@ -14,17 +13,17 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
+        android:text="返回"
         android:textColor="#ffffff"
-        android:visibility="gone"
-        android:text="返回"/>
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/text_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:textColor="#ffffff"
-        android:text="QQMusicApiDemo"/>
+        android:text="QQMusicApiDemo"
+        android:textColor="#ffffff" />
 
 
     <TextView
@@ -34,9 +33,9 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="20dp"
+        android:text="更多接口"
         android:textColor="#ffffff"
-        android:visibility="gone"
-        android:text="更多"/>
+        android:visibility="gone" />
 
 
 </RelativeLayout>

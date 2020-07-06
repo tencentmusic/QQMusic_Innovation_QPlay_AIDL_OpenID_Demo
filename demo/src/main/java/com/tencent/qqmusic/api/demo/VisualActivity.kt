@@ -264,6 +264,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             }
             else -> {
                 Log.e(TAG, "platform error!", RuntimeException())
+                Toast.makeText(this, "请先在Config中填写配置信息！", Toast.LENGTH_SHORT).show()
+                return false
             }
         }
         return bindService(intent, this, Context.BIND_AUTO_CREATE)

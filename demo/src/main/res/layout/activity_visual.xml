@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".VisualActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".VisualActivity">
 
     <include
         android:id="@+id/top_bar"
         layout="@layout/common_top_bar"
         android:layout_width="match_parent"
-        android:layout_height="40dp"/>
+        android:layout_height="40dp" />
 
     <RelativeLayout
         android:id="@+id/playerPanel"
@@ -23,7 +23,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginLeft="5dp"
-            android:layout_marginTop="5dp"/>
+            android:layout_marginTop="5dp" />
 
         <TextView
             android:id="@+id/txtPlayTime"
@@ -32,7 +32,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginTop="5dp"
             android:layout_marginRight="5dp"
-            android:text="时间"/>
+            android:text="时间" />
 
         <TextView
             android:id="@+id/txtSongInfos"
@@ -42,7 +42,7 @@
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@+id/SongPic"
             android:ems="10"
-            android:text="歌曲信息"/>
+            android:text="歌曲信息" />
 
         <TextView
             android:id="@+id/txtAlbum"
@@ -52,7 +52,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@+id/SongPic"
-            android:text="专辑-歌手"/>
+            android:text="专辑-歌手" />
 
         <LinearLayout
             android:id="@+id/ll_button"
@@ -67,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onActiveClick"
-                android:text="授权"/>
+                android:text="授权" />
 
             <Button
                 android:id="@+id/btnPlayPre"
@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onPlayPre"
-                android:text="上一首"/>
+                android:text="上一首" />
 
             <Button
                 android:id="@+id/btnPlayPause"
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onPlayPause"
-                android:text="播放"/>
+                android:text="播放" />
 
             <Button
                 android:id="@+id/btnPlayNext"
@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onPlayNext"
-                android:text="下一首"/>
+                android:text="下一首" />
 
             <Button
                 android:id="@+id/btnLove"
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onLoveClick"
-                android:text="收藏"/>
+                android:text="收藏" />
 
         </LinearLayout>
 
@@ -115,21 +115,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onClickOpiSearch"
-                android:text="Opi搜索"/>
+                android:text="Opi搜索" />
 
             <Button
                 android:id="@+id/btnOpiMvTag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onClickOpiMvTag"
-                android:text="Opi重命名"/>
+                android:text="Opi重命名" />
 
             <Button
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onClickSchemeAction"
-                android:text="自定义跳转"/>
+                android:text="自定义跳转" />
 
 
         </LinearLayout>
@@ -140,7 +140,7 @@
             android:layout_height="35dp"
             android:layout_below="@+id/ll_opi_button"
             android:ems="10"
-            android:text="Debug informations"/>
+            android:text="Debug informations" />
 
         <ProgressBar
             android:id="@+id/ProgressPlay"
@@ -151,7 +151,7 @@
             android:layout_marginTop="2dp"
             android:max="1000"
             android:progress="0"
-            android:secondaryProgress="0"/>
+            android:secondaryProgress="0" />
     </RelativeLayout>
 
 
@@ -165,14 +165,14 @@
             android:id="@+id/listview_folder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"/>
+            android:layout_marginTop="5dp" />
 
         <ListView
             android:id="@+id/listview_song"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
     </RelativeLayout>
 
 

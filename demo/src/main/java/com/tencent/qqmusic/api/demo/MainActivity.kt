@@ -29,15 +29,13 @@ class MainActivity : Activity(), ServiceConnection {
         override fun onEvent(event: String, extra: Bundle) {
             runOnUiThread {
                 if (event == Events.API_EVENT_PLAY_SONG_CHANGED) {
-                    songText.text = extra.getString(Keys.API_EVENT_KEY_PLAY_SONG)
+                    songText.text = "歌曲信息： ".plus(extra.getString(Keys.API_EVENT_KEY_PLAY_SONG))
                 } else if (event == Events.API_EVENT_PLAY_LIST_CHANGED) {
                     val size = extra.getInt(Keys.API_EVENT_KEY_PLAY_LIST_SIZE)
-                    songList.text = "".plus(size)
+                    songList.text = "歌曲数量： ".plus(size)
                 }
-
             }
         }
-
     }
 
     private var qqmusicApi: IQQMusicApi? = null
@@ -45,7 +43,7 @@ class MainActivity : Activity(), ServiceConnection {
     override fun onServiceDisconnected(p0: ComponentName) {
         // 失去连接，可能QQ音乐退出了
         arrayOf(executeButton, executeAsyncButton).forEach { it.isEnabled = false }
-        textView.text = "disconnected"
+        textView.text = "连接状态: disconnected"
     }
 
     override fun onServiceConnected(p0: ComponentName, p1: IBinder) {
@@ -57,14 +55,14 @@ class MainActivity : Activity(), ServiceConnection {
         qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_LIST_CHANGED), eventListener)
 
         arrayOf(executeButton, executeAsyncButton).forEach { it.isEnabled = true }
-        textView.text = "connected"
+        textView.text = "连接状态: connected"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val adapter = ArrayAdapter<String>(this,
+        val adapter = ArrayAdapter(this,
                 android.R.layout.simple_dropdown_item_1line, ACTIONS)
         actionText.setAdapter(adapter)
         actionText.setOnItemClickListener { adapterView: AdapterView<*>, view1: View, i: Int, l: Long ->
@@ -132,7 +130,7 @@ class MainActivity : Activity(), ServiceConnection {
                             putString(params[i], paramsText.text.lines()[i])
                         }
                     }
-                } else if(paramsKeyText.text.toString().contains(";")) {
+                } else if (paramsKeyText.text.toString().contains(";")) {
                     val params = paramsKeyText.text.toString().split(";")
                     val slotList = ArrayList<String>()
                     for (i in params.indices) {
@@ -147,7 +145,7 @@ class MainActivity : Activity(), ServiceConnection {
                 } else {
                     if (paramsKeyText.text.toString() == "page") {
                         putInt(paramsKeyText.text.toString(), paramsText.text.lines()[0].toInt())
-                    } else if(paramsKeyText.text.toString() == "intent") {
+                    } else if (paramsKeyText.text.toString() == "intent") {
                         putString(paramsKeyText.text.toString(), paramsText.text.lines()[0])
                     } else {
                         putStringArrayList(paramsKeyText.text.toString(), ArrayList(paramsText.text.lines()))
