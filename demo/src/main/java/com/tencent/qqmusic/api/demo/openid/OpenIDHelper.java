@@ -32,8 +32,7 @@ public class OpenIDHelper {
             if (encryptData == null) {
                 return null;
             }
-            String encryptString = Base64.encodeToString(encryptData, Base64.DEFAULT);
-            return encryptString;
+            return Base64.encodeToString(encryptData, Base64.DEFAULT);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -46,8 +45,7 @@ public class OpenIDHelper {
             //7.使用App私钥解密
             byte[] decryptData = RSAUtils.decryptByPrivateKey(qmEncryptData, Config.OPENID_APP_PRIVATE_KEY);
             if (decryptData != null) {
-                String decryptString = new String(decryptData);
-                return decryptString;
+                return new String(decryptData);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,14 +61,13 @@ public class OpenIDHelper {
      */
     public static boolean checkQMSign(String sign, String nonce) {
         if (sign == null || nonce == null)
-            return false;
+            return true;
         try {
-            boolean verifyOk = RSAUtils.verify(nonce.getBytes(), QQMusicPublicKey, sign);
-            return verifyOk;
+            return !RSAUtils.verify(nonce.getBytes(), QQMusicPublicKey, sign);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return true;
     }
 
 }

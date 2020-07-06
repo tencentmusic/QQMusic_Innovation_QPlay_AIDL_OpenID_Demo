@@ -9,7 +9,7 @@ import android.widget.Toast
 
 class CallbackActivity : Activity() {
     companion object {
-        val TAG = "CallbackActivity"
+        const val TAG = "CallbackActivity"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,14 +35,14 @@ class CallbackActivity : Activity() {
         val intent = intent
         val scheme = intent.scheme
         val uri = intent.data
-        Log.i(CallbackActivity.TAG, "uri:" + uri)
+        Log.i(TAG, "uri:$uri")
         if (uri != null) {
             val cmd = uri.getQueryParameter("cmd")
             if (cmd == "open") {
                 Log.i(TAG, "ret:" + uri.getQueryParameter("ret"))
             } else if (cmd == "verify") {
                 val ret = uri.getQueryParameter("ret")
-                var intent = Intent()
+                val intent = Intent()
                 intent.action = "callback_verify_notify"
                 intent.putExtra("ret", ret)
                 sendBroadcast(intent)

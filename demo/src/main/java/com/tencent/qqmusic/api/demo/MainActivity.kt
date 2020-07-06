@@ -11,11 +11,10 @@ import android.os.IBinder
 import android.view.View
 import android.widget.*
 import com.tencent.qqmusic.third.api.contract.*
-import java.util.*
-import kotlin.collections.ArrayList
 
 @SuppressLint("SetTextI18n")
 class MainActivity : Activity(), ServiceConnection {
+
     private val textBack by lazy { findViewById<TextView>(R.id.text_back) }
     private val textView by lazy { findViewById<TextView>(R.id.text) }
     private val paramsKeyText by lazy { findViewById<EditText>(R.id.textView2) }
@@ -32,7 +31,7 @@ class MainActivity : Activity(), ServiceConnection {
                 if (event == Events.API_EVENT_PLAY_SONG_CHANGED) {
                     songText.text = extra.getString(Keys.API_EVENT_KEY_PLAY_SONG)
                 } else if (event == Events.API_EVENT_PLAY_LIST_CHANGED) {
-                    var size = extra.getInt(Keys.API_EVENT_KEY_PLAY_LIST_SIZE)
+                    val size = extra.getInt(Keys.API_EVENT_KEY_PLAY_LIST_SIZE)
                     songList.text = "".plus(size)
                 }
 
@@ -99,7 +98,7 @@ class MainActivity : Activity(), ServiceConnection {
             val params = Bundle().apply {
                 if (paramsKeyText.text.toString().contains(",")) {
                     val params = paramsKeyText.text.toString().split(",")
-                    for (i in 0..(params.size - 1)) {
+                    for (i in 0 until params.size) {
                         if (params[i] == "folderType" || params[i] == "page" || params[i] == "searchType") {
                             putInt(params[i], paramsText.text.lines()[i].toInt())
                         } else {
@@ -124,7 +123,7 @@ class MainActivity : Activity(), ServiceConnection {
             val params = Bundle().apply {
                 if (paramsKeyText.text.toString().contains(",")) {
                     val params = paramsKeyText.text.toString().split(",")
-                    for (i in 0..(params.size - 1)) {
+                    for (i in params.indices) {
                         if (params[i] == "folderType" || params[i] == "page" || params[i] == "searchType") {
                             putInt(params[i], paramsText.text.lines()[i].toInt())
                         } else if (params[i] == "firstPage") {
@@ -136,12 +135,12 @@ class MainActivity : Activity(), ServiceConnection {
                 } else if(paramsKeyText.text.toString().contains(";")) {
                     val params = paramsKeyText.text.toString().split(";")
                     val slotList = ArrayList<String>()
-                    for (i in 0..(params.size - 1)) {
+                    for (i in params.indices) {
                         if (params[i] == "query") {
                             putString(params[i], paramsText.text.lines()[i])
                         } else {
                             slotList.add(paramsText.text.lines()[i])
-                            slotList.add(paramsText.text.lines()[i+1])
+                            slotList.add(paramsText.text.lines()[i + 1])
                         }
                     }
                     putStringArrayList(params[1], slotList)
@@ -165,7 +164,7 @@ class MainActivity : Activity(), ServiceConnection {
             textView.text = "failed to connect"
         }
         textBack.visibility = View.VISIBLE
-        textBack.setOnClickListener() {
+        textBack.setOnClickListener {
             this@MainActivity.finish()
         }
     }
@@ -244,6 +243,8 @@ class MainActivity : Activity(), ServiceConnection {
     }
 
     companion object {
+        const val TAG = "MainActivity"
+
         val ACTIONS = arrayListOf(
                 "hi",
                 "playSongMid",

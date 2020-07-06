@@ -43,7 +43,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
 
     var cmd = "start"
-    var bindFlag = false
+    private var bindFlag = false
     private var openId: String? = null
     private var openToken: String? = null
 
@@ -74,10 +74,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private var curPlayTime: Long = 0
     private var totalPlayTime: Long = 0
 
-    var m_OpenAPIAppID = ""
-    var m_OpenAPIAppKey = ""
-    var m_OpenAPIAppPrivateKey = ""
-
+    // OpenAPI相关参数，AIDL可忽略
+    private var m_OpenAPIAppID = ""
+    private var m_OpenAPIAppKey = ""
+    private var m_OpenAPIAppPrivateKey = ""
 
     private val gson = Gson()
     private var isDataInited: Boolean = false
@@ -86,6 +86,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val backId: Int = -10000
     private var backFolder: Data.FolderInfo? = null
     private var backSong: Data.Song? = null
+
     //private  val MSG_BIND_LOOPER: Int = 11
     var TAG = "VisualActivity"
     private var thread: Thread? = null
@@ -103,7 +104,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             when (msg.what) {
                 22 -> {
                     val bindRet = bindQQMusicApiService(BIND_PLATFORM)
-                    Log.i("VisualActivity", "bindRet:" + bindRet)
+                    Log.i("VisualActivity", "bindRet:$bindRet")
                     if (!bindRet) {
                         sendEmptyMessageDelayed(22, 100)
                     }
@@ -115,8 +116,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
     private var m_Receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            var ret = p1?.extras?.get("ret")
-            Log.d(TAG, "ret:" + ret)
+            val ret = p1?.extras?.get("ret")
+            Log.d(TAG, "ret:$ret")
             if (ret == "0") {
                 initData()
             } else {
@@ -136,7 +137,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             if (position >= curFolderlist.size) {
                 return@OnItemClickListener
             }
-            var folder = curFolderlist[position]
+            val folder = curFolderlist[position]
 
             if (folder.type == backId) {
                 onBackClick(view)
@@ -144,8 +145,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             }
 
             var needPush = true
-            if (pathStack.isEmpty() == false) {
-                var stackFolder = pathStack.peek()
+            if (!pathStack.isEmpty()) {
+                val stackFolder = pathStack.peek()
                 if (stackFolder.id == curFolder?.id && stackFolder.type == curFolder?.type) {
                     needPush = false
                 }
@@ -154,7 +155,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 pathStack.push(curFolder)
 
             curFolder = folder
-            if (folder?.isSongFolder == true) {
+            if (folder.isSongFolder) {
                 getSongList(folder, 0)
             } else {
                 if (folder != null)
@@ -165,12 +166,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         songAdapter = SongListAdapter(this)
         songListView.adapter = songAdapter
         songListView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
-            var song = curSonglist[position]
+            val song = curSonglist[position]
 
             if (song.id == backId.toString()) {
                 onBackClick(view)
             } else {
-                var songlist = curSonglist.subList(1, curSonglist.size - 1)
+                val songlist = curSonglist.subList(1, curSonglist.size - 1)
                 playSonglist(songlist, song)
             }
         }
@@ -182,24 +183,24 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         backSong?.id = backId.toString()
         backSong?.title = ".. 返回上一级"
         textMore.visibility = VISIBLE
-        textMore.setOnClickListener() {
+        textMore.setOnClickListener {
             initMorePopupWindow()
         }
 
-        var filter = IntentFilter()
+        val filter = IntentFilter()
         filter.addAction("callback_verify_notify")
         registerReceiver(m_Receiver, filter)
     }
 
-    fun rpc_startRequest() {
-        CommonCmd.startQQMusicProcess(this, packageName)
+    private fun rpc_startRequest() {
+        startQQMusicProcess(this, packageName)
     }
 
-    fun rpc_verifyRequest() {
+    private fun rpc_verifyRequest() {
         val time = System.currentTimeMillis()
         val nonce = time.toString()
         val encryptString = OpenIDHelper.getEncryptString(nonce)
-        CommonCmd.verifyCallerIdentity(this, Config.OPENID_APPID, packageName, encryptString, "qqmusicapidemo://xxx")
+        verifyCallerIdentity(this, Config.OPENID_APPID, packageName, encryptString, "qqmusicapidemo://xxx")
     }
 
     override fun onDestroy() {
@@ -216,17 +217,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         unregisterReceiver(m_Receiver)
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun onServiceConnected(p0: ComponentName, p1: IBinder) {
 //         绑定成功
         qqmusicApi = IQQMusicApi.Stub.asInterface(p1)
         txtResult.text = "已连接QQ音乐"
         bindFlag = true
         Log.d(TAG, "service has connected")
-        CommonCmd.init(BIND_PLATFORM)
+        init(BIND_PLATFORM)
         sayHi()
     }
 
@@ -237,10 +234,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun sayHi() {
-        var bundle = Bundle()
-        bundle.putInt(Keys.API_PARAM_KEY_SDK_VERSION, CommonCmd.SDK_VERSION)
-        bundle.putString(Keys.API_PARAM_KEY_PLATFORM_TYPE, CommonCmd.AIDL_PLATFORM_TYPE_PHONE)
-        var result = qqmusicApi?.execute("hi", bundle)
+        val bundle = Bundle()
+        bundle.putInt(Keys.API_PARAM_KEY_SDK_VERSION, SDK_VERSION)
+        bundle.putString(Keys.API_PARAM_KEY_PLATFORM_TYPE, AIDL_PLATFORM_TYPE_PHONE)
+        val result = qqmusicApi?.execute("hi", bundle)
         Log.d(TAG, "sayHi ret:" + result!!.getInt(Keys.API_RETURN_KEY_CODE))
         if (commonOpen(result)) {
             initData()
@@ -250,21 +247,24 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     /**
      * 绑定QQ音乐API服务
      */
-    private fun bindQQMusicApiService(platform:String): Boolean {
+    private fun bindQQMusicApiService(platform: String): Boolean {
         var intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
         // 必须显式绑定
-        when(platform){
+        when (platform) {
             AIDL_PLATFORM_TYPE_PHONE -> {
                 intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
-                intent.`package` = "com.tencent.qqmusic"}
+                intent.`package` = "com.tencent.qqmusic"
+            }
             AIDL_PLATFORM_TYPE_CAR -> {
                 intent = Intent("com.tencent.qqmusiccar.third.api.QQMusicApiService")
-                intent.`package` = "com.tencent.qqmusiccar"}
+                intent.`package` = "com.tencent.qqmusiccar"
+            }
             AIDL_PLATFORM_TYPE_TV -> {
                 intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
-                intent.`package` = "com.tencent.qqmusictv"}
+                intent.`package` = "com.tencent.qqmusictv"
+            }
             else -> {
-                Log.e(TAG,"platform error!",RuntimeException())
+                Log.e(TAG, "platform error!", RuntimeException())
             }
         }
         return bindService(intent, this, Context.BIND_AUTO_CREATE)
@@ -278,7 +278,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_STATE_CHANGED), eventListener)
 
         //获取根目录
-        var rootFolder = Data.FolderInfo()
+        val rootFolder = Data.FolderInfo()
         rootFolder.id = ""
         rootFolder.type = 0
         rootFolder.isSongFolder = false
@@ -336,7 +336,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     fun onPlayNext(view: View) {
         val result = qqmusicApi?.execute("skipToNext", null)
-        var errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+        val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
         if (errorCode != ErrorCodes.ERROR_OK) {
             print("下一首失败($errorCode)")
         }
@@ -349,13 +349,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         if (isPlaying()) {
             val result = qqmusicApi?.execute("pauseMusic", null)
-            var errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+            val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
             if (errorCode != ErrorCodes.ERROR_OK) {
                 print("暂停音乐失败($errorCode)")
             }
         } else {
             val result = qqmusicApi?.execute("playMusic", null)
-            var errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+            val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
             if (errorCode != ErrorCodes.ERROR_OK) {
                 print("开始播放音乐失败($errorCode)")
             }
@@ -363,16 +363,16 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     }
 
-    fun onBackClick(view: View) {
+    private fun onBackClick(view: View) {
         if (pathStack.empty()) {
-            var rootFolder = Data.FolderInfo()
+            val rootFolder = Data.FolderInfo()
             rootFolder.id = ""
             rootFolder.type = 0
             rootFolder.isSongFolder = false
             getFolderList(rootFolder, 0)
             return
         }
-        var folder = pathStack.pop()
+        val folder = pathStack.pop()
         curFolder = folder
         if (folder.isSongFolder) {
             getSongList(folder, 0)
@@ -383,7 +383,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     fun onLoveClick(view: View) {
-        var midList = ArrayList<String>()
+        val midList = ArrayList<String>()
         midList.add(curPlaySong?.mid ?: "")
         val params = Bundle()
         params.putStringArrayList("midList", midList)
@@ -395,9 +395,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     commonOpen(result)
                     val code = result.getInt(Keys.API_RETURN_KEY_CODE)
                     if (code == ErrorCodes.ERROR_OK) {
-                        runOnUiThread({
+                        runOnUiThread {
                             setLoveStateText(true)
-                        })
+                        }
                     } else {
                         print("添加收藏失败（$code)")
                     }
@@ -410,9 +410,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     commonOpen(result)
                     val code = result.getInt(Keys.API_RETURN_KEY_CODE)
                     if (code == ErrorCodes.ERROR_OK) {
-                        runOnUiThread({
+                        runOnUiThread {
                             setLoveStateText(false)
-                        })
+                        }
                     } else {
                         print("取消收藏失败（$code)")
                     }
@@ -430,7 +430,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 rpc_verifyRequest()
                 return false
             } else if (code == ErrorCodes.ERROR_NEED_USER_AUTHENTICATION) {
-                CommonCmd.loginQQMusic(this@VisualActivity, "qqmusicapidemo://xxx")
+                loginQQMusic(this@VisualActivity, "qqmusicapidemo://xxx")
                 return false
             } else if (code == ErrorCodes.ERROR_API_NOT_INITIALIZED) {
                 return false
@@ -455,10 +455,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         if (isUserFolder) {
             //用户歌单使用新API获取
             if (this.openId.isNullOrEmpty() || this.openToken.isNullOrEmpty()) {
-                startAIDLAuth({ success ->
+                startAIDLAuth { success ->
                     if (success)
                         getUserFolderList(folder, page)
-                })
+                }
                 return
             }
             getUserFolderList(folder, page)
@@ -486,14 +486,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val code = result.getInt(Keys.API_RETURN_KEY_CODE)
 
                 if (code == ErrorCodes.ERROR_OK) {
-                    var dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
+                    val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
 
                     val array = JsonParser().parse(dataJson).asJsonArray
-                    var tmpList = ArrayList<Data.FolderInfo>()
+                    val tmpList = ArrayList<Data.FolderInfo>()
                     if (folder.type != 0)
                         backFolder?.let { tmpList.add(it) }
                     for (elem in array) {
-                        var folder = gson.fromJson(elem, Data.FolderInfo::class.java)
+                        val folder = gson.fromJson(elem, Data.FolderInfo::class.java)
                         tmpList.add(folder)
                     }
 
@@ -532,14 +532,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val code = result.getInt(Keys.API_RETURN_KEY_CODE)
 
                 if (code == ErrorCodes.ERROR_OK) {
-                    var dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
+                    val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
 
                     val array = JsonParser().parse(dataJson).asJsonArray
-                    var tmpList = ArrayList<Data.FolderInfo>()
+                    val tmpList = ArrayList<Data.FolderInfo>()
                     if (folder.type != 0)
                         backFolder?.let { tmpList.add(it) }
                     for (elem in array) {
-                        var folder = gson.fromJson(elem, Data.FolderInfo::class.java)
+                        val folder = gson.fromJson(elem, Data.FolderInfo::class.java)
                         tmpList.add(folder)
                     }
 
@@ -566,10 +566,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         if (isUserFolder) {
             //用户歌曲使用新API获取
             if (this.openId.isNullOrEmpty() || this.openToken.isNullOrEmpty()) {
-                startAIDLAuth({ success ->
+                startAIDLAuth { success ->
                     if (success)
                         getUserSongList(folder, page)
-                })
+                }
                 return
             }
             getUserSongList(folder, page)
@@ -601,12 +601,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val code = result.getInt(Keys.API_RETURN_KEY_CODE)
 
                 if (code == ErrorCodes.ERROR_OK) {
-                    var dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
+                    val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
                     curSonglist.clear()
                     backSong?.let { curSonglist.add(it) }
                     for (elem in array) {
-                        var song = gson.fromJson(elem, Data.Song::class.java)
+                        val song = gson.fromJson(elem, Data.Song::class.java)
                         curSonglist.add(song)
                     }
                     print("获取歌曲列表成功（${curSonglist.size})")
@@ -643,12 +643,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val code = result.getInt(Keys.API_RETURN_KEY_CODE)
 
                 if (code == ErrorCodes.ERROR_OK) {
-                    var dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
+                    val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
                     curSonglist.clear()
                     backSong?.let { curSonglist.add(it) }
                     for (elem in array) {
-                        var song = gson.fromJson(elem, Data.Song::class.java)
+                        val song = gson.fromJson(elem, Data.Song::class.java)
                         curSonglist.add(song)
                     }
                     print("获取歌曲列表成功（${curSonglist.size})")
@@ -663,7 +663,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     //通过SongId播放歌曲列表
     private fun playSonglist(songList: List<Data.Song>, song: Data.Song) {
-        var idList = ArrayList<String>()
+        val idList = ArrayList<String>()
         var curIndex = 0
         for (i in songList.indices) {
             idList.add(songList[i].id)
@@ -671,7 +671,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 curIndex = i
         }
         if (curIndex > 0) {
-            var subList = idList.subList(0, curIndex).toList()
+            val subList = idList.subList(0, curIndex).toList()
             try {
                 idList.removeAll(subList)
                 idList.addAll(subList)
@@ -684,6 +684,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val params = Bundle()
         params.putStringArrayList("songIdList", idList)
         print("播放歌曲列表... ${song.title},${songList.size}")
+
         qqmusicApi?.executeAsync("playSongId", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -701,7 +702,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     //通过SongId播放歌曲列表
     private fun playSonglistAtIndex(songList: List<Data.Song>, index: Int) {
-        var idList = ArrayList<String>()
+        val idList = ArrayList<String>()
         for (i in songList.indices) {
             idList.add(songList[i].id)
         }
@@ -727,7 +728,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     //通过Mid播放歌曲列表
     private fun playSongMidAtIndex(songList: List<Data.Song>, index: Int) {
-        var midList = ArrayList<String>()
+        val midList = ArrayList<String>()
         for (i in songList.indices) {
             midList.add(songList[i].mid)
         }
@@ -753,9 +754,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     //同步当前播放信息
     private fun syncCurrentPlayInfo() {
-
         var result = qqmusicApi?.execute("getCurrentSong", null)
-        var curSongJson = result?.getString(Keys.API_RETURN_KEY_DATA)
+        val curSongJson = result?.getString(Keys.API_RETURN_KEY_DATA)
         this.curPlaySong = gson.fromJson(curSongJson, Data.Song::class.java)
         if (this.curPlaySong == null)
             return
@@ -776,7 +776,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         txtPlayTime.text = "$curPlayTime/$totalPlayTime"
 
-        var midList = ArrayList<String>()
+        val midList = ArrayList<String>()
         midList.add(curPlaySong?.mid ?: "")
         val params = Bundle()
         params.putStringArrayList("midList", midList)
@@ -786,7 +786,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 commonOpen(result)
                 val code = result.getInt(Keys.API_RETURN_KEY_CODE)
                 if (code == ErrorCodes.ERROR_OK) {
-                    var boolArray = result.getBooleanArray(Keys.API_RETURN_KEY_DATA)
+                    val boolArray = result.getBooleanArray(Keys.API_RETURN_KEY_DATA)
                     if (boolArray != null && boolArray.isNotEmpty()) {
                         runOnUiThread { setLoveStateText(boolArray[0]) }
                         print("获取收藏状态成功")
@@ -801,7 +801,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun setPlayStateText() {
-        var isPlayingNow = isPlaying()
+        val isPlayingNow = isPlaying()
         btnPlayPause.text = if (isPlayingNow) "暂停" else "播放"
     }
 
@@ -812,12 +812,11 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private fun isPlaying(): Boolean {
         if (curPlaySong == null)
             return false
-        var isPlayingNow = (curPlayState == PlayState.STARTED
+        return (curPlayState == PlayState.STARTED
                 || curPlayState == PlayState.INITIALIZED
                 || curPlayState == PlayState.PREPARED
                 || curPlayState == PlayState.PREPARING
                 || curPlayState == PlayState.BUFFERING)
-        return isPlayingNow
     }
 
     //AIDL方式请求授权
@@ -897,7 +896,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     //加载图片
-    fun getURLimage(url: String): Bitmap? {
+    private fun getURLimage(url: String): Bitmap? {
         var bmp: Bitmap? = null
         try {
             val imgUrl = URL(url)
@@ -940,18 +939,18 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
 
-    fun getSign(unixTime: Long): String {
-        var signStr = "OpitrtqeGzopIlwxs_" + m_OpenAPIAppID + "_" + m_OpenAPIAppKey + "_" + m_OpenAPIAppPrivateKey + "_" + unixTime
+    private fun getSign(unixTime: Long): String {
+        val signStr = "OpitrtqeGzopIlwxs_" + m_OpenAPIAppID + "_" + m_OpenAPIAppKey + "_" + m_OpenAPIAppPrivateKey + "_" + unixTime
 
         try {
             val instance: MessageDigest = MessageDigest.getInstance("MD5")
             val digest: ByteArray = instance.digest(signStr.toByteArray())
-            var sb = StringBuffer()
+            val sb = StringBuffer()
             for (b in digest) {
-                var i: Int = b.toInt() and 0xff
+                val i: Int = b.toInt() and 0xff
                 var hexString = Integer.toHexString(i)
                 if (hexString.length < 2) {
-                    hexString = "0" + hexString
+                    hexString = "0$hexString"
                 }
                 sb.append(hexString)
             }
@@ -969,10 +968,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             Toast.makeText(this, "请先获取授权", Toast.LENGTH_LONG).show()
             return
         }
-        Log.i(TAG, "onClickOpiSearch openid:" + openId + "  openToken:" + openToken)
+        Log.i(TAG, "onClickOpiSearch openid:$openId  openToken:$openToken")
         val time = System.currentTimeMillis()
         val timeStamp = time / 1000
-        var searchUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_search.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s&t=0&w=fdsfd",
+        val searchUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_search.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s&t=0&w=fdsfd",
                 m_OpenAPIAppID, m_OpenAPIAppKey, timeStamp, getSign(timeStamp), m_OpenAPIAppKey, openId, openToken)
         sendHttp(searchUrl)
     }
@@ -982,17 +981,17 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             Toast.makeText(this, "请先获取授权", Toast.LENGTH_LONG).show()
             return
         }
-        Log.i(TAG, "onClickOpiMvTag openid:" + openId + "  openToken:" + openToken)
+        Log.i(TAG, "onClickOpiMvTag openid:$openId  openToken:$openToken")
         val time = System.currentTimeMillis()
         val timeStamp = time / 1000
-        var mvTagUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_get_mv_by_tag.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&mv_area=0&mv_year=0&mv_type=2&mv_tag=10&mv_pageno=1&mv_pagecount=2&mv_cmd=gettaglist&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s"
+        val mvTagUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_get_mv_by_tag.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&mv_area=0&mv_year=0&mv_type=2&mv_tag=10&mv_pageno=1&mv_pagecount=2&mv_cmd=gettaglist&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s"
                 , m_OpenAPIAppID, m_OpenAPIAppKey, timeStamp, getSign(timeStamp), m_OpenAPIAppKey, openId, openToken)
         sendHttp(mvTagUrl)
     }
 
 
     fun onClickSchemeAction(view: View) {
-        CommonCmd.init(CommonCmd.AIDL_PLATFORM_TYPE_PHONE)
+        init(AIDL_PLATFORM_TYPE_PHONE)
         val bundle = Bundle()
         bundle.putInt(Keys.API_PARAM_KEY_ACTION, 8)
         bundle.putLong(Keys.API_PARAM_KEY_PULL_FROM, 10026465)
@@ -1001,7 +1000,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         bundle.putBoolean(Keys.API_PARAM_KEY_M1, false)
         bundle.putBoolean(Keys.API_PARAM_KEY_MB, true)
         bundle.putBoolean(Keys.API_PARAM_KEY_M2, true)
-        CommonCmd.action(this, bundle)
+        action(this, bundle)
     }
 
     private fun sendHttp(urlString: String) {
@@ -1062,23 +1061,20 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         var imgView: ImageView? = null
 
         init {
-            this.txtTitle = itemView?.findViewById<TextView>(R.id.item_title)
+            this.txtTitle = itemView?.findViewById(R.id.item_title)
             if (isSongItem) {
-                this.txtContent = itemView?.findViewById<TextView>(R.id.item_content)
-                this.imgView = itemView?.findViewById<ImageView>(R.id.item_img)
+                this.txtContent = itemView?.findViewById(R.id.item_content)
+                this.imgView = itemView?.findViewById(R.id.item_img)
             }
         }
     }
 
-    inner class FolderListAdapter : BaseAdapter {
-
+    inner class FolderListAdapter(context: Context, private var list: ArrayList<Data.FolderInfo>) : BaseAdapter() {
 
         private var mInflater: LayoutInflater? = null
-        private var list: ArrayList<Data.FolderInfo>
 
-        constructor(context: Context, list: ArrayList<Data.FolderInfo>) : super() {
+        init {
             mInflater = LayoutInflater.from(context)
-            this.list = list
         }
 
         override fun getItem(position: Int): Any {
@@ -1095,7 +1091,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val view: View?
-            var holder: ViewHolder?
+            val holder: ViewHolder?
             if (convertView == null) {
 
                 view = mInflater?.inflate(R.layout.folder_list_view_item, null)
@@ -1109,7 +1105,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             if (position >= count) {
                 return view as View
             }
-            var folder = this.list[position]
+            val folder = this.list[position]
             if (folder != null) {
                 holder.txtTitle?.text = folder.mainTitle
 
@@ -1119,12 +1115,11 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     }
 
-    inner class SongListAdapter : BaseAdapter {
-
+    inner class SongListAdapter(context: Context) : BaseAdapter() {
 
         private var mInflater: LayoutInflater? = null
 
-        constructor(context: Context) : super() {
+        init {
             mInflater = LayoutInflater.from(context)
         }
 
@@ -1142,7 +1137,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val view: View?
-            var holder: ViewHolder?
+            val holder: ViewHolder?
             if (convertView == null) {
 
                 view = mInflater?.inflate(R.layout.song_list_view_item, null)
@@ -1157,7 +1152,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             if (position >= count) {
                 return view as View
             }
-            var song = curSonglist[position]
+            val song = curSonglist[position]
             if (song != null) {
                 holder.txtTitle?.text = song.title
                 if (song.singer != null) {
@@ -1182,14 +1177,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 //        }
 
         val mPopupWindow = PopupWindow(contentView, width, ViewGroup.LayoutParams.WRAP_CONTENT)
-        mPopupWindow.setFocusable(true)
-        mPopupWindow.setTouchable(true)
-        mPopupWindow.setOutsideTouchable(true)
-        mPopupWindow.getContentView().isFocusable = true
-        mPopupWindow.getContentView().isFocusableInTouchMode = true
-        mPopupWindow.getContentView().setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+        mPopupWindow.isFocusable = true
+        mPopupWindow.isTouchable = true
+        mPopupWindow.isOutsideTouchable = true
+        mPopupWindow.contentView.isFocusable = true
+        mPopupWindow.contentView.isFocusableInTouchMode = true
+        mPopupWindow.contentView.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                if (mPopupWindow != null && mPopupWindow.isShowing()) {
+                if (mPopupWindow != null && mPopupWindow.isShowing) {
                     mPopupWindow.dismiss()
                 }
                 return@OnKeyListener true
