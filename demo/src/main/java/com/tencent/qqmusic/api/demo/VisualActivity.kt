@@ -41,7 +41,6 @@ import kotlin.concurrent.thread
 * */
 class VisualActivity : AppCompatActivity(), ServiceConnection {
 
-
     var cmd = "start"
     private var bindFlag = false
     private var openId: String? = null
