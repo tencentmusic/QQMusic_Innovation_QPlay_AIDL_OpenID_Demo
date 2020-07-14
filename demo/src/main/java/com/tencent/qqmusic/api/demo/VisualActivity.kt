@@ -840,9 +840,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         val appParser = JSONTokener(qmDecryptString)
                         val appDecryptJson = appParser.nextValue() as JSONObject
                         val sign = appDecryptJson.getString(Keys.API_RETURN_KEY_SIGN)
-                        val nonce = appDecryptJson.getString(Keys.API_RETURN_KEY_NONCE)
+                        val returnNonce = appDecryptJson.getString(Keys.API_RETURN_KEY_NONCE)
                         //检查签名
-                        if (OpenIDHelper.checkQMSign(sign, nonce)) {
+                        if (OpenIDHelper.checkQMSign(sign, returnNonce)) {
                             authOK = true
                             openId = appDecryptJson.getString(Keys.API_RETURN_KEY_OPEN_ID)
                             openToken = appDecryptJson.getString(Keys.API_RETURN_KEY_OPEN_TOKEN)

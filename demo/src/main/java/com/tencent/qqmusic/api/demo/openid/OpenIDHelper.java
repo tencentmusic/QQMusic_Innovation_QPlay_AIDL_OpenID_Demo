@@ -61,13 +61,13 @@ public class OpenIDHelper {
      */
     public static boolean checkQMSign(String sign, String nonce) {
         if (sign == null || nonce == null)
-            return true;
+            return false;
         try {
-            return !RSAUtils.verify(nonce.getBytes(), QQMusicPublicKey, sign);
+            return RSAUtils.verify(nonce.getBytes(), QQMusicPublicKey, sign);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
+        return false;
     }
 
 }
