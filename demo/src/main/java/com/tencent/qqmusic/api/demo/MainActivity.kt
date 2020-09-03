@@ -23,40 +23,9 @@ import kotlin.collections.ArrayList
 class MainActivity : Activity(), ServiceConnection {
     companion object {
         const val TAG = "MainActivity"
-        val ACTIONS = arrayListOf(
-                "hi",
-                "playSongMid",
-                "playSongMidAtIndex",
-                "playSongLocalPath",
-                "playMusic",
-                "stopMusic",
-                "pauseMusic",
-                "resumeMusic",
-                "skipToNext",
-                "skipToPrevious",
-                "getPlaybackState",
-                "addToFavourite",
-                "removeFromFavourite",
-                "openQQMusic",
-                "getCurrentSong",
-                "playSongId",
-                "playSongIdAtIndex",
-                "getTotalTime",
-                "getCurrTime",
-                "getPlayList",
-                "getFolderList",
-                "getSongList",
-                "search",
-                "getPlayMode",
-                "setPlayMode",
-                "isFavouriteMid",
-                "isQQMusicForeground",
-                "getLoginState",
-                "seekForward",
-                "seekBack",
-                "voicePlay",
-                "voiceShortcut"
-        )
+
+        val ACTIONS = Methods::class.java.methods.map { it.name }.toList()
+
     }
     //top bar 返回键
     private val textBack by lazy { findViewById<TextView>(R.id.text_back) }
@@ -180,6 +149,8 @@ class MainActivity : Activity(), ServiceConnection {
                         putStringArrayList(paramsKeyEditText.text.toString(), ArrayList(paramsValueEditText.text.lines()))
                     }
                 }
+                //tv端需要添加from key
+                putLong("from", 1)
             }
             execute(actionEditText.text.toString(), params, false)
         }
@@ -218,13 +189,15 @@ class MainActivity : Activity(), ServiceConnection {
                         putStringArrayList(paramsKeyEditText.text.toString(), ArrayList(paramsValueEditText.text.lines()))
                     }
                 }
+                //tv端需要添加from key
+                putLong("from", 1)
             }
             execute(actionEditText.text.toString(), params, true)
         }
 
         //bindQQMusicApiService
         connectStateTextView.text = "connecting..."
-        val bindRet = bindQQMusicApiService()
+        val bindRet = bindQQMusicApiService(Config.BIND_PLATFORM)
         if (!bindRet) {
             connectStateTextView.text = "failed to connect"
         }
@@ -289,10 +262,23 @@ class MainActivity : Activity(), ServiceConnection {
     /**
      * 绑定QQ音乐API服务
      */
-    private fun bindQQMusicApiService(): Boolean {
+    private fun bindQQMusicApiService(platform:String): Boolean {
+        var intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
         // 必须显式绑定
-        val intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
-        intent.`package` = "com.tencent.qqmusic"
+        when(platform){
+            CommonCmd.AIDL_PLATFORM_TYPE_PHONE -> {
+                intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
+                intent.`package` = "com.tencent.qqmusic"}
+            CommonCmd.AIDL_PLATFORM_TYPE_CAR -> {
+                intent = Intent("com.tencent.qqmusiccar.third.api.QQMusicApiService")
+                intent.`package` = "com.tencent.qqmusiccar"}
+            CommonCmd.AIDL_PLATFORM_TYPE_TV -> {
+                intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
+                intent.`package` = "com.tencent.qqmusictv"}
+            else -> {
+                Log.e(TAG,"platform error!",RuntimeException())
+            }
+        }
         return bindService(intent, this, Context.BIND_AUTO_CREATE)
     }
 
