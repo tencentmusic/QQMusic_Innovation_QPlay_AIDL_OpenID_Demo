@@ -7,3 +7,5 @@ gradle.properties
 .gradle
 /build
 demo/build
+local.properties
+demo/release
