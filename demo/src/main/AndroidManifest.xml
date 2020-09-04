@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".VisualActivity"
             android:screenOrientation="portrait"
@@ -19,22 +20,20 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-
-            <!-- <intent-filter>
-             <action android:name="android.intent.action.MAIN" />
-            android:screenOrientation="portrait"
-
-             <category android:name="android.intent.category.LAUNCHER" />
-             </intent-filter>-->
+<!--            <intent-filter>-->
+<!--             <action android:name="android.intent.action.MAIN" />-->
+<!--             <category android:name="android.intent.category.LAUNCHER" />-->
+<!--             </intent-filter>-->
         </activity>
+
         <activity
             android:name=".CallbackActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
@@ -42,13 +41,12 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
                 <data android:scheme="qqmusicapidemo"/>
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
