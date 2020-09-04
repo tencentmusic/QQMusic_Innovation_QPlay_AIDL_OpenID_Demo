@@ -40,7 +40,9 @@ import kotlin.concurrent.thread
 * 可视化的Api调用Demo，如需查看完整调用，参考MainActivity
 * */
 class VisualActivity : AppCompatActivity(), ServiceConnection {
-
+    companion object{
+        const val TAG = "VisualActivity"
+    }
     private var bindFlag = false
     private var openId: String? = null
     private var openToken: String? = null
@@ -50,7 +52,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val txtSongInfos by lazy { findViewById<TextView>(R.id.txtSongInfos) }
     private val txtPlayTime by lazy { findViewById<TextView>(R.id.txtPlayTime) }
     private val songPic by lazy { findViewById<ImageView>(R.id.SongPic) }
-    private val progressPaly by lazy { findViewById<ProgressBar>(R.id.ProgressPlay) }
+    private val progressPlay by lazy { findViewById<ProgressBar>(R.id.ProgressPlay) }
     private val txtAlbum by lazy { findViewById<TextView>(R.id.txtAlbum) }
     private val btnPlayPause by lazy { findViewById<Button>(R.id.btnPlayPause) }
     private val btnLove by lazy { findViewById<Button>(R.id.btnLove) }
@@ -60,6 +62,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val songListView by lazy { findViewById<ListView>(R.id.listview_song) }
 
     private var qqmusicApi: IQQMusicApi? = null
+
     private var folderAdapter: FolderListAdapter? = null
     private var songAdapter: SongListAdapter? = null
     private val pathStack: Stack<Data.FolderInfo> = Stack()
@@ -76,7 +79,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     var m_OpenAPIAppKey = ""
     var m_OpenAPIAppPrivateKey = ""
 
-
     private val gson = Gson()
     private var isDataInited: Boolean = false
     private var progressTimer: Timer? = null
@@ -85,7 +87,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private var backFolder: Data.FolderInfo? = null
     private var backSong: Data.Song? = null
     //private  val MSG_BIND_LOOPER: Int = 11
-    var TAG = "VisualActivity"
     private var thread: Thread? = null
 
     private fun myTherad() {
@@ -111,23 +112,67 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             }
         }
     }
-    private var m_Receiver: BroadcastReceiver = object : BroadcastReceiver() {
+
+    private var activeBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            var ret = p1?.extras?.get("ret")
-            Log.d(TAG, "ret:" + ret)
+            val ret = p1?.extras?.get("ret")
+            Log.d(TAG, "ret:$ret")
             if (ret == "0") {
                 initData()
             } else {
                 Log.d(TAG,"授权失败($ret)")
             }
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_visual)
-        folderAdapter = FolderListAdapter(this@VisualActivity, curFolderlist)
+
+        initFolderListView()
+
+        backFolder = Data.FolderInfo()
+        backFolder?.type = backId
+        backFolder?.mainTitle = ".. 返回上一级"
+
+        initSongListView()
+
+        backSong = Data.Song()
+        backSong?.id = backId.toString()
+        backSong?.title = ".. 返回上一级"
+
+        textMore.visibility = VISIBLE
+        textMore.setOnClickListener {
+            initMorePopupWindow()
+        }
+
+        //register activeBroadcastReceiver
+        val filter = IntentFilter()
+        filter.addAction("callback_verify_notify")
+        registerReceiver(activeBroadcastReceiver, filter)
+
+        val btnActive = findViewById<TextView>(R.id.btnActive)
+        btnActive.setOnClickListener { onActiveClick(it) }
+
+    }
+
+    private fun initSongListView() {
+        songAdapter = SongListAdapter(this)
+        songListView.adapter = songAdapter
+        songListView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
+            val song = curSonglist[position]
+
+            if (song.id == backId.toString()) {
+                onBackClick(view)
+            } else {
+                val songlist = curSonglist.subList(1, curSonglist.size - 1)
+                playSonglist(songlist, song)
+            }
+        }
+    }
+
+    private fun initFolderListView() {
+        folderAdapter = FolderListAdapter(this, curFolderlist)
         folderListView.adapter = folderAdapter
         //点击处理
         folderListView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
@@ -142,7 +187,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             }
 
             var needPush = true
-            if (pathStack.isEmpty() == false) {
+            if (!pathStack.isEmpty()) {
                 var stackFolder = pathStack.peek()
                 if (stackFolder.id == curFolder?.id && stackFolder.type == curFolder?.type) {
                     needPush = false
@@ -152,46 +197,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 pathStack.push(curFolder)
 
             curFolder = folder
-            if (folder?.isSongFolder) {
+            if (folder.isSongFolder) {
                 getSongList(folder, 0)
             } else {
                 if (folder != null)
                     getFolderList(folder, 0)
             }
         }
-
-        songAdapter = SongListAdapter(this)
-        songListView.adapter = songAdapter
-        songListView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
-            val song = curSonglist[position]
-
-            if (song.id == backId.toString()) {
-                onBackClick(view)
-            } else {
-                val songlist = curSonglist.subList(1, curSonglist.size - 1)
-                playSonglist(songlist, song)
-            }
-        }
-
-        backFolder = Data.FolderInfo()
-        backFolder?.type = backId
-        backFolder?.mainTitle = ".. 返回上一级"
-        backSong = Data.Song()
-        backSong?.id = backId.toString()
-        backSong?.title = ".. 返回上一级"
-        textMore.visibility = VISIBLE
-        textMore.setOnClickListener() {
-            initMorePopupWindow()
-        }
-
-        var filter = IntentFilter()
-        filter.addAction("callback_verify_notify")
-        registerReceiver(m_Receiver, filter)
-
-
-        val btnActive = findViewById<TextView>(R.id.btnActive)
-        btnActive.setOnClickListener { onActiveClick(it) }
-
     }
 
     fun rpc_startRequest() {
@@ -216,11 +228,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         if (bindFlag) {
             unbindService(this)
         }
-        unregisterReceiver(m_Receiver)
-    }
-
-    override fun onResume() {
-        super.onResume()
+        unregisterReceiver(activeBroadcastReceiver)
     }
 
     override fun onServiceConnected(p0: ComponentName, p1: IBinder) {
@@ -320,12 +328,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     }
 
-    fun onActiveClick(view: View) {
+    private fun onActiveClick(view: View) {
         val bindRet = bindQQMusicApiService(BIND_PLATFORM)
         if (!bindRet) {
             Log.d(TAG,"bind失败")
 
             txtResult.text = "连接QQ音乐失败"
+
             myTherad()
             thread?.start()
             myHandler.sendEmptyMessage(22)
@@ -340,9 +349,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         Log.d(TAG, "onPlayPre")
 
         val result = qqmusicApi?.execute("skipToPrevious", null)
-        var errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+        val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
         if (errorCode != ErrorCodes.ERROR_OK) {
-            print("上一首失败($errorCode)")
+            Log.d(TAG,"上一首失败($errorCode)")
         }
     }
 
@@ -350,9 +359,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         Log.d(TAG, "onPlayNext")
 
         val result = qqmusicApi?.execute("skipToNext", null)
-        var errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+        val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
         if (errorCode != ErrorCodes.ERROR_OK) {
-            print("下一首失败($errorCode)")
+            Log.d(TAG,"下一首失败($errorCode)")
         }
     }
 
@@ -363,15 +372,15 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         if (isPlaying()) {
             val result = qqmusicApi?.execute("pauseMusic", null)
-            var errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+            val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
             if (errorCode != ErrorCodes.ERROR_OK) {
-                print("暂停音乐失败($errorCode)")
+                Log.d(TAG,"暂停音乐失败($errorCode)")
             }
         } else {
             val result = qqmusicApi?.execute("playMusic", null)
-            var errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+            val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
             if (errorCode != ErrorCodes.ERROR_OK) {
-                print("开始播放音乐失败($errorCode)")
+                Log.d(TAG,"开始播放音乐失败($errorCode)")
             }
         }
 
@@ -794,7 +803,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         txtPlayTime.text = "$curPlayTime/$totalPlayTime"
 
-        var midList = ArrayList<String>()
+        val midList = ArrayList<String>()
         midList.add(curPlaySong?.mid ?: "")
         val params = Bundle()
         params.putStringArrayList("midList", midList)
@@ -830,7 +839,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private fun isPlaying(): Boolean {
         if (curPlaySong == null)
             return false
-        var isPlayingNow = (curPlayState == PlayState.STARTED
+        val isPlayingNow = (curPlayState == PlayState.STARTED
                 || curPlayState == PlayState.INITIALIZED
                 || curPlayState == PlayState.PREPARED
                 || curPlayState == PlayState.PREPARING
@@ -1067,8 +1076,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 2 -> {
                     txtPlayTime.text = "$curPlayTime/$totalPlayTime"
                     if (totalPlayTime > curPlayTime) {
-                        progressPaly.max = totalPlayTime.toInt()
-                        progressPaly.progress = curPlayTime.toInt()
+                        progressPlay.max = totalPlayTime.toInt()
+                        progressPlay.progress = curPlayTime.toInt()
                     }
                 }
             }
@@ -1115,7 +1124,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val view: View?
-            var holder: ViewHolder?
+            val holder: ViewHolder?
             if (convertView == null) {
 
                 view = mInflater?.inflate(R.layout.folder_list_view_item, null)
@@ -1129,7 +1138,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             if (position >= count) {
                 return view as View
             }
-            var folder = this.list[position]
+            val folder = this.list[position]
             if (folder != null) {
                 holder.txtTitle?.text = folder.mainTitle
 
@@ -1140,8 +1149,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     inner class SongListAdapter : BaseAdapter {
-
-
         private var mInflater: LayoutInflater? = null
 
         constructor(context: Context) : super() {
@@ -1177,7 +1184,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             if (position >= count) {
                 return view as View
             }
-            var song = curSonglist[position]
+            val song = curSonglist[position]
             if (song != null) {
                 holder.txtTitle?.text = song.title
                 if (song.singer != null) {
@@ -1196,20 +1203,17 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     private fun initMorePopupWindow() {
         val contentView = layoutInflater.inflate(R.layout.view_popview_more, null)
-//        var width = textMore.width
-//        if (width == 0) {
         val width = resources.getDimension(R.dimen.dimen_width).toInt()
-//        }
 
         val mPopupWindow = PopupWindow(contentView, width, ViewGroup.LayoutParams.WRAP_CONTENT)
-        mPopupWindow.setFocusable(true)
-        mPopupWindow.setTouchable(true)
-        mPopupWindow.setOutsideTouchable(true)
-        mPopupWindow.getContentView().isFocusable = true
-        mPopupWindow.getContentView().isFocusableInTouchMode = true
-        mPopupWindow.getContentView().setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+        mPopupWindow.isFocusable = true
+        mPopupWindow.isTouchable = true
+        mPopupWindow.isOutsideTouchable = true
+        mPopupWindow.contentView.isFocusable = true
+        mPopupWindow.contentView.isFocusableInTouchMode = true
+        mPopupWindow.contentView.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                if (mPopupWindow != null && mPopupWindow.isShowing()) {
+                if (mPopupWindow != null && mPopupWindow.isShowing) {
                     mPopupWindow.dismiss()
                 }
                 return@OnKeyListener true

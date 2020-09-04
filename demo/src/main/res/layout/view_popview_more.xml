@@ -9,7 +9,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/colorPrimaryDark"></View>
+        android:background="@color/colorPrimaryDark" />
 
     <TextView
         android:id="@+id/text_test_api"
@@ -20,6 +20,5 @@
         android:gravity="center"
         android:textColor="@color/white"
         android:text="接口测试"/>
-
 
 </LinearLayout>
