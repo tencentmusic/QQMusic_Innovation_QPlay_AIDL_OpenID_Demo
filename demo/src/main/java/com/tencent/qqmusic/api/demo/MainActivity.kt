@@ -60,7 +60,6 @@ class MainActivity : Activity(), ServiceConnection {
                     val size = extra.getInt(Keys.API_EVENT_KEY_PLAY_LIST_SIZE)
                     songListSizeTextView.text = "songListSize:$size"
                 }
-
             }
         }
     }
@@ -204,7 +203,7 @@ class MainActivity : Activity(), ServiceConnection {
 
         //init top bar
         textBack.visibility = View.VISIBLE
-        textBack.setOnClickListener() {
+        textBack.setOnClickListener {
             this@MainActivity.finish()
         }
         bt_register.setOnClickListener {

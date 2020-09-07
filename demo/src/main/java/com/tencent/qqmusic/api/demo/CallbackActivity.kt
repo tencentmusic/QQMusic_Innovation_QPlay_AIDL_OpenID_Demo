@@ -4,21 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Toast
-import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
-import org.json.JSONObject
-import org.json.JSONTokener
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
-import kotlin.concurrent.thread
 
 
 class CallbackActivity : Activity() {
     companion object {
-        val TAG = "CallbackActivity"
+        const val TAG = "CallbackActivity"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,14 +35,14 @@ class CallbackActivity : Activity() {
         val intent = intent
         val scheme = intent.scheme
         val uri = intent.data
-        Log.i(CallbackActivity.TAG, "uri:" + uri)
+        Log.i(TAG, "uri:$uri")
         if (uri != null) {
             val cmd = uri.getQueryParameter("cmd")
             if (cmd == "open") {
                 Log.i(TAG, "ret:" + uri.getQueryParameter("ret"))
             } else if (cmd == "verify") {
                 val ret = uri.getQueryParameter("ret")
-                var intent = Intent()
+                val intent = Intent()
                 intent.action = "callback_verify_notify"
                 intent.putExtra("ret", ret)
                 sendBroadcast(intent)

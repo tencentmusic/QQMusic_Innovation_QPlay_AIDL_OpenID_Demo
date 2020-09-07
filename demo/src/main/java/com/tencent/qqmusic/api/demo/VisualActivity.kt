@@ -75,9 +75,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private var curPlayTime: Long = 0
     private var totalPlayTime: Long = 0
 
-    var m_OpenAPIAppID = ""
-    var m_OpenAPIAppKey = ""
-    var m_OpenAPIAppPrivateKey = ""
+    // OpenAPI相关参数，AIDL可忽略
+    private var m_OpenAPIAppID = ""
+    private var m_OpenAPIAppKey = ""
+    private var m_OpenAPIAppPrivateKey = ""
 
     private val gson = Gson()
     private var isDataInited: Boolean = false
@@ -86,6 +87,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val backId: Int = -10000
     private var backFolder: Data.FolderInfo? = null
     private var backSong: Data.Song? = null
+
     //private  val MSG_BIND_LOOPER: Int = 11
 
     private val handler :Handler by lazy { Handler() }
@@ -217,7 +219,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val time = System.currentTimeMillis()
         val nonce = time.toString()
         val encryptString = OpenIDHelper.getEncryptString(nonce)
-        CommonCmd.verifyCallerIdentity(this, Config.OPENID_APPID, packageName, encryptString, "qqmusicapidemo://xxx")
+        verifyCallerIdentity(this, Config.OPENID_APPID, packageName, encryptString, "qqmusicapidemo://xxx")
     }
 
     /**
@@ -272,21 +274,26 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     /**
      * 绑定QQ音乐API服务
      */
-    private fun bindQQMusicApiService(platform:String): Boolean {
+    private fun bindQQMusicApiService(platform: String): Boolean {
         var intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
         // 必须显式绑定
-        when(platform){
+        when (platform) {
             AIDL_PLATFORM_TYPE_PHONE -> {
                 intent = Intent("com.tencent.qqmusic.third.api.QQMusicApiService")
-                intent.`package` = "com.tencent.qqmusic"}
+                intent.`package` = "com.tencent.qqmusic"
+            }
             AIDL_PLATFORM_TYPE_CAR -> {
                 intent = Intent("com.tencent.qqmusiccar.third.api.QQMusicApiService")
-                intent.`package` = "com.tencent.qqmusiccar"}
+                intent.`package` = "com.tencent.qqmusiccar"
+            }
             AIDL_PLATFORM_TYPE_TV -> {
                 intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
-                intent.`package` = "com.tencent.qqmusictv"}
+                intent.`package` = "com.tencent.qqmusictv"
+            }
             else -> {
-                Log.e(TAG,"platform error!",RuntimeException())
+                Log.e(TAG, "platform error!", RuntimeException())
+                Toast.makeText(this, "请先在Config中填写配置信息！", Toast.LENGTH_SHORT).show()
+                return false
             }
         }
         return bindService(intent, this, Context.BIND_AUTO_CREATE)
@@ -380,16 +387,16 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     }
 
-    fun onBackClick(view: View) {
+    private fun onBackClick(view: View) {
         if (pathStack.empty()) {
-            var rootFolder = Data.FolderInfo()
+            val rootFolder = Data.FolderInfo()
             rootFolder.id = ""
             rootFolder.type = 0
             rootFolder.isSongFolder = false
             getFolderList(rootFolder, 0)
             return
         }
-        var folder = pathStack.pop()
+        val folder = pathStack.pop()
         curFolder = folder
         if (folder.isSongFolder) {
             getSongList(folder, 0)
@@ -620,12 +627,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val code = result.getInt(Keys.API_RETURN_KEY_CODE)
 
                 if (code == ErrorCodes.ERROR_OK) {
-                    var dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
+                    val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
                     curSonglist.clear()
                     backSong?.let { curSonglist.add(it) }
                     for (elem in array) {
-                        var song = gson.fromJson(elem, Data.Song::class.java)
+                        val song = gson.fromJson(elem, Data.Song::class.java)
                         curSonglist.add(song)
                     }
                     print("获取歌曲列表成功（${curSonglist.size})")
@@ -662,12 +669,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val code = result.getInt(Keys.API_RETURN_KEY_CODE)
 
                 if (code == ErrorCodes.ERROR_OK) {
-                    var dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
+                    val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
                     curSonglist.clear()
                     backSong?.let { curSonglist.add(it) }
                     for (elem in array) {
-                        var song = gson.fromJson(elem, Data.Song::class.java)
+                        val song = gson.fromJson(elem, Data.Song::class.java)
                         curSonglist.add(song)
                     }
                     print("获取歌曲列表成功（${curSonglist.size})")
@@ -682,7 +689,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     //通过SongId播放歌曲列表
     private fun playSonglist(songList: List<Data.Song>, song: Data.Song) {
-        var idList = ArrayList<String>()
+        val idList = ArrayList<String>()
         var curIndex = 0
         for (i in songList.indices) {
             idList.add(songList[i].id)
@@ -690,7 +697,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 curIndex = i
         }
         if (curIndex > 0) {
-            var subList = idList.subList(0, curIndex).toList()
+            val subList = idList.subList(0, curIndex).toList()
             try {
                 idList.removeAll(subList)
                 idList.addAll(subList)
@@ -703,6 +710,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val params = Bundle()
         params.putStringArrayList("songIdList", idList)
         print("播放歌曲列表... ${song.title},${songList.size}")
+
         qqmusicApi?.executeAsync("playSongId", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -720,7 +728,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     //通过SongId播放歌曲列表
     private fun playSonglistAtIndex(songList: List<Data.Song>, index: Int) {
-        var idList = ArrayList<String>()
+        val idList = ArrayList<String>()
         for (i in songList.indices) {
             idList.add(songList[i].id)
         }
@@ -746,7 +754,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     //通过Mid播放歌曲列表
     private fun playSongMidAtIndex(songList: List<Data.Song>, index: Int) {
-        var midList = ArrayList<String>()
+        val midList = ArrayList<String>()
         for (i in songList.indices) {
             midList.add(songList[i].mid)
         }
@@ -827,7 +835,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun setPlayStateText() {
-        var isPlayingNow = isPlaying()
+        val isPlayingNow = isPlaying()
         btnPlayPause.text = if (isPlayingNow) "暂停" else "播放"
     }
 
@@ -843,7 +851,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 || curPlayState == PlayState.PREPARED
                 || curPlayState == PlayState.PREPARING
                 || curPlayState == PlayState.BUFFERING)
-        return isPlayingNow
     }
 
     //AIDL方式请求授权
@@ -868,9 +875,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         val appParser = JSONTokener(qmDecryptString)
                         val appDecryptJson = appParser.nextValue() as JSONObject
                         val sign = appDecryptJson.getString(Keys.API_RETURN_KEY_SIGN)
-                        val nonce = appDecryptJson.getString(Keys.API_RETURN_KEY_NONCE)
+                        val returnNonce = appDecryptJson.getString(Keys.API_RETURN_KEY_NONCE)
                         //检查签名
-                        if (OpenIDHelper.checkQMSign(sign, nonce)) {
+                        if (OpenIDHelper.checkQMSign(sign, returnNonce)) {
                             authOK = true
                             openId = appDecryptJson.getString(Keys.API_RETURN_KEY_OPEN_ID)
                             openToken = appDecryptJson.getString(Keys.API_RETURN_KEY_OPEN_TOKEN)
@@ -964,18 +971,18 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
 
-    fun getSign(unixTime: Long): String {
-        var signStr = "OpitrtqeGzopIlwxs_" + m_OpenAPIAppID + "_" + m_OpenAPIAppKey + "_" + m_OpenAPIAppPrivateKey + "_" + unixTime
+    private fun getSign(unixTime: Long): String {
+        val signStr = "OpitrtqeGzopIlwxs_" + m_OpenAPIAppID + "_" + m_OpenAPIAppKey + "_" + m_OpenAPIAppPrivateKey + "_" + unixTime
 
         try {
             val instance: MessageDigest = MessageDigest.getInstance("MD5")
             val digest: ByteArray = instance.digest(signStr.toByteArray())
-            var sb = StringBuffer()
+            val sb = StringBuffer()
             for (b in digest) {
-                var i: Int = b.toInt() and 0xff
+                val i: Int = b.toInt() and 0xff
                 var hexString = Integer.toHexString(i)
                 if (hexString.length < 2) {
-                    hexString = "0" + hexString
+                    hexString = "0$hexString"
                 }
                 sb.append(hexString)
             }
@@ -993,10 +1000,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             Toast.makeText(this, "请先获取授权", Toast.LENGTH_LONG).show()
             return
         }
-        Log.i(TAG, "onClickOpiSearch openid:" + openId + "  openToken:" + openToken)
+        Log.i(TAG, "onClickOpiSearch openid:$openId  openToken:$openToken")
         val time = System.currentTimeMillis()
         val timeStamp = time / 1000
-        var searchUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_search.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s&t=0&w=fdsfd",
+        val searchUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_search.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s&t=0&w=fdsfd",
                 m_OpenAPIAppID, m_OpenAPIAppKey, timeStamp, getSign(timeStamp), m_OpenAPIAppKey, openId, openToken)
         sendHttp(searchUrl)
     }
@@ -1006,17 +1013,17 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             Toast.makeText(this, "请先获取授权", Toast.LENGTH_LONG).show()
             return
         }
-        Log.i(TAG, "onClickOpiMvTag openid:" + openId + "  openToken:" + openToken)
+        Log.i(TAG, "onClickOpiMvTag openid:$openId  openToken:$openToken")
         val time = System.currentTimeMillis()
         val timeStamp = time / 1000
-        var mvTagUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_get_mv_by_tag.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&mv_area=0&mv_year=0&mv_type=2&mv_tag=10&mv_pageno=1&mv_pagecount=2&mv_cmd=gettaglist&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s"
+        val mvTagUrl = String.format("http://cd.y.qq.com/ext-internal/fcgi-bin/music_open_api.fcg?opi_cmd=fcg_music_custom_get_mv_by_tag.fcg&app_id=%s&app_key=%s&timestamp=%d&sign=%s&login_type=6&mv_area=0&mv_year=0&mv_type=2&mv_tag=10&mv_pageno=1&mv_pagecount=2&mv_cmd=gettaglist&qqmusic_open_appid=%s&qqmusic_open_id=%s&qqmusic_access_token=%s"
                 , m_OpenAPIAppID, m_OpenAPIAppKey, timeStamp, getSign(timeStamp), m_OpenAPIAppKey, openId, openToken)
         sendHttp(mvTagUrl)
     }
 
 
     fun onClickSchemeAction(view: View) {
-        CommonCmd.init(CommonCmd.AIDL_PLATFORM_TYPE_PHONE)
+        init(AIDL_PLATFORM_TYPE_PHONE)
         val bundle = Bundle()
         bundle.putInt(Keys.API_PARAM_KEY_ACTION, 8)
         bundle.putLong(Keys.API_PARAM_KEY_PULL_FROM, 10026465)
@@ -1025,7 +1032,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         bundle.putBoolean(Keys.API_PARAM_KEY_M1, false)
         bundle.putBoolean(Keys.API_PARAM_KEY_MB, true)
         bundle.putBoolean(Keys.API_PARAM_KEY_M2, true)
-        CommonCmd.action(this, bundle)
+        action(this, bundle)
     }
 
     private fun sendHttp(urlString: String) {
@@ -1086,10 +1093,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         var imgView: ImageView? = null
 
         init {
-            this.txtTitle = itemView?.findViewById<TextView>(R.id.item_title)
+            this.txtTitle = itemView?.findViewById(R.id.item_title)
             if (isSongItem) {
-                this.txtContent = itemView?.findViewById<TextView>(R.id.item_content)
-                this.imgView = itemView?.findViewById<ImageView>(R.id.item_img)
+                this.txtContent = itemView?.findViewById(R.id.item_content)
+                this.imgView = itemView?.findViewById(R.id.item_img)
             }
         }
     }

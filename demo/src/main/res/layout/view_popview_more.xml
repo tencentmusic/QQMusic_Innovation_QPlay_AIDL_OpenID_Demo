@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:background="@color/colorPrimary"
-              android:layout_marginBottom="5dp"
-              android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="5dp"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
 
     <View
         android:layout_width="match_parent"
@@ -15,10 +15,10 @@
         android:id="@+id/text_test_api"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:textSize="15sp"
         android:layout_gravity="center"
         android:gravity="center"
+        android:text="点我测试！"
         android:textColor="@color/white"
-        android:text="接口测试"/>
+        android:textSize="15sp" />
 
 </LinearLayout>
