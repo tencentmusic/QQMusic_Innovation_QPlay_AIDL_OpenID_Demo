@@ -212,6 +212,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun startQQMusicProcess() {
+        Log.d(TAG, "startQQMusicProcess: ")
         CommonCmd.startQQMusicProcess(this, packageName)
     }
 
@@ -846,7 +847,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private fun isPlaying(): Boolean {
         if (curPlaySong == null)
             return false
-        val isPlayingNow = (curPlayState == PlayState.STARTED
+        return (curPlayState == PlayState.STARTED
                 || curPlayState == PlayState.INITIALIZED
                 || curPlayState == PlayState.PREPARED
                 || curPlayState == PlayState.PREPARING

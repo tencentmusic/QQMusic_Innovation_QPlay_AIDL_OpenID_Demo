@@ -55,10 +55,10 @@ class MainActivity : Activity(), ServiceConnection {
 
             runOnUiThread {
                 if (event == Events.API_EVENT_PLAY_SONG_CHANGED) {
-                    currentSongTextView.text = extra.getString(Keys.API_EVENT_KEY_PLAY_SONG)
+                    currentSongTextView.text = "歌曲信息： ".plus(extra.getString(Keys.API_EVENT_KEY_PLAY_SONG))
                 } else if (event == Events.API_EVENT_PLAY_LIST_CHANGED) {
                     val size = extra.getInt(Keys.API_EVENT_KEY_PLAY_LIST_SIZE)
-                    songListSizeTextView.text = "songListSize:$size"
+                    songListSizeTextView.text = "歌曲数量： $size"
                 }
             }
         }
@@ -73,16 +73,15 @@ class MainActivity : Activity(), ServiceConnection {
         qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_SONG_CHANGED), eventListener)
         qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_STATE_CHANGED), eventListener)
         qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_LIST_CHANGED), eventListener)
-        qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_SONG_FAVORITE_STATE_CHANGED), eventListener)
 
         arrayOf(executeButton, executeAsyncButton).forEach { it.isEnabled = true }
-        connectStateTextView.text = "connected"
+        connectStateTextView.text = "连接状态: connected"
     }
 
     override fun onServiceDisconnected(p0: ComponentName) {
         // 失去连接，可能QQ音乐退出了
         arrayOf(executeButton, executeAsyncButton).forEach { it.isEnabled = false }
-        connectStateTextView.text = "disconnected"
+        connectStateTextView.text = "连接状态: disconnected"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

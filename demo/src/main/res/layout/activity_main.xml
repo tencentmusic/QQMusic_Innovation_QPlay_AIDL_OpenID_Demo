@@ -125,7 +125,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="execute" />
+                android:text="Execute(同步接口)" />
 
             <Button
                 android:id="@+id/bt_execute_async"
@@ -134,7 +134,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="Execute Async" />
+                android:text="Execute Async(异步接口)" />
             <Button
                 android:id="@+id/bt_register"
                 android:layout_width="match_parent"
