@@ -9,13 +9,11 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Message
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
+import android.view.*
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import com.google.gson.Gson
@@ -47,7 +45,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private var openId: String? = null
     private var openToken: String? = null
 
-    private val textMore by lazy { findViewById<TextView>(R.id.text_more) }
     private val txtResult by lazy { findViewById<TextView>(R.id.txtResult) }
     private val txtSongInfos by lazy { findViewById<TextView>(R.id.txtSongInfos) }
     private val txtPlayTime by lazy { findViewById<TextView>(R.id.txtPlayTime) }
@@ -115,6 +112,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_visual)
+        setupToolBar()
 
         initFolderListView()
 
@@ -128,12 +126,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         backSong?.id = backId.toString()
         backSong?.title = ".. 返回上一级"
 
-        //更多 popup window
-        textMore.visibility = VISIBLE
-        textMore.setOnClickListener {
-            initMorePopupWindow()
-        }
-
         //register activeBroadcastReceiver
         val filter = IntentFilter()
         filter.addAction("callback_verify_notify")
@@ -141,6 +133,21 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         val btnActive = findViewById<TextView>(R.id.btnActive)
         btnActive.setOnClickListener { onActiveClick(it) }
+    }
+
+    private fun setupToolBar() {
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        toolbar.setOnMenuItemClickListener {
+            val intent = Intent(this@VisualActivity, MainActivity::class.java)
+            startActivity(intent)
+            true
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        return true
     }
 
     private fun initFolderListView() {
@@ -1197,39 +1204,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             return view as View
         }
 
-    }
-
-    private fun initMorePopupWindow() {
-        val contentView = layoutInflater.inflate(R.layout.view_popview_more, null)
-        val width = resources.getDimension(R.dimen.dimen_width).toInt()
-
-        val mPopupWindow = PopupWindow(contentView, width, ViewGroup.LayoutParams.WRAP_CONTENT)
-        mPopupWindow.isFocusable = true
-        mPopupWindow.isTouchable = true
-        mPopupWindow.isOutsideTouchable = true
-        mPopupWindow.contentView.isFocusable = true
-        mPopupWindow.contentView.isFocusableInTouchMode = true
-        mPopupWindow.contentView.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                if (mPopupWindow != null && mPopupWindow.isShowing) {
-                    mPopupWindow.dismiss()
-                }
-                return@OnKeyListener true
-            }
-            false
-        })
-        mPopupWindow.setBackgroundDrawable(BitmapDrawable())
-        mPopupWindow.showAsDropDown(textMore, 0, 0)
-        mPopupWindow.update()
-
-        val text_Api = contentView.findViewById(R.id.text_test_api) as TextView
-        text_Api.setOnClickListener {
-            val intent = Intent(this@VisualActivity, MainActivity::class.java)
-            startActivity(intent)
-            if (mPopupWindow.isShowing) {
-                mPopupWindow.dismiss()
-            }
-        }
     }
 
 }

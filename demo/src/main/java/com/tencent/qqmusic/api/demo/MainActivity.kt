@@ -1,34 +1,32 @@
 package com.tencent.qqmusic.api.demo
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.View
 import android.widget.*
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
 import com.tencent.qqmusic.third.api.contract.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.collections.ArrayList
 
 @SuppressLint("SetTextI18n")
 /**
  * 完整接口测试
  */
-class MainActivity : Activity(), ServiceConnection {
+class MainActivity : AppCompatActivity(), ServiceConnection {
     companion object {
         const val TAG = "MainActivity"
 
         val ACTIONS = Methods::class.java.methods.map { it.name }.toList()
 
     }
-    //top bar 返回键
-    private val textBack by lazy { findViewById<TextView>(R.id.text_back) }
 
     //service连接状态
     private val connectStateTextView by lazy { findViewById<TextView>(R.id.tv_connect_state) }
@@ -87,6 +85,10 @@ class MainActivity : Activity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener { onBackPressed() }
 
         //init actionText 随着action改变 设置key value的值
         val adapter = ArrayAdapter<String>(this,
@@ -200,11 +202,6 @@ class MainActivity : Activity(), ServiceConnection {
             connectStateTextView.text = "failed to connect"
         }
 
-        //init top bar
-        textBack.visibility = View.VISIBLE
-        textBack.setOnClickListener {
-            this@MainActivity.finish()
-        }
         bt_register.setOnClickListener {
             qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_SONG_FAVORITE_STATE_CHANGED), eventListener)
         }
