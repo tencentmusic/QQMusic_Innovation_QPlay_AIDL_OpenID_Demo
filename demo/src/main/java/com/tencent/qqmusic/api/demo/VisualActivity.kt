@@ -820,8 +820,19 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         //使用isFavouriteMid判断curPlaySong
         val midList = ArrayList<String>()
         midList.add(curPlaySong?.mid ?: "")
-        val params = Bundle()
-        params.putStringArrayList("midList", midList)
+        val typeList = ArrayList<String>()
+        typeList.add(curPlaySong?.type.toString())
+
+        val params = Bundle().apply {
+            putStringArrayList("midList", midList)
+            putStringArrayList("typeList", typeList)
+        }
+        if (curPlaySong?.id != null) {
+            val idList = ArrayList<String>()
+            idList.add(curPlaySong?.id ?: "")
+            params.putStringArrayList("idList", idList)
+        }
+
         qqmusicApi?.executeAsync("isFavouriteMid", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 Log.d(TAG, "isFavouriteMid onReturn")
