@@ -1,0 +1,7 @@
+<resources>
+    <string-array name="bind_platform_array">
+        <item>手机</item>
+        <item>TV</item>
+        <item>Car</item>
+    </string-array>
+</resources>
