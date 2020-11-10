@@ -3,11 +3,11 @@ package com.tencent.qqmusic.api.demo
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
@@ -139,14 +139,37 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         toolbar.setOnMenuItemClickListener {
-            val intent = Intent(this@VisualActivity, MainActivity::class.java)
-            startActivity(intent)
+            if (it.itemId == R.id.item_goto_test_api) {
+                val intent = Intent(this@VisualActivity, MainActivity::class.java)
+                startActivity(intent)
+            } else if(it.itemId == R.id.item_bind_platform) {
+                val builder = AlertDialog.Builder(this)
+                builder.setItems(R.array.bind_platform_array
+                        ) { _, which ->
+                            when (which) {
+                                0 -> {
+                                    BIND_PLATFORM = CommonCmd.AIDL_PLATFORM_TYPE_PHONE
+                                }
+                                1 -> {
+                                    BIND_PLATFORM = CommonCmd.AIDL_PLATFORM_TYPE_TV
+                                }
+                                2 -> {
+                                    BIND_PLATFORM = CommonCmd.AIDL_PLATFORM_TYPE_CAR
+                                }
+                            }
+                            it.title = "设备类型:" + Config.BIND_PLATFORM
+                        }
+                builder.create().show()
+
+            }
+
             true
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
+        menu?.findItem(R.id.item_bind_platform)?.title = "设备类型:" + Config.BIND_PLATFORM
         return true
     }
 
@@ -269,7 +292,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         val bundle = Bundle()
         bundle.putInt(Keys.API_PARAM_KEY_SDK_VERSION, CommonCmd.SDK_VERSION)
-        bundle.putString(Keys.API_PARAM_KEY_PLATFORM_TYPE, CommonCmd.AIDL_PLATFORM_TYPE_PHONE)
+        bundle.putString(Keys.API_PARAM_KEY_PLATFORM_TYPE, Config.BIND_PLATFORM)
 
         val result = qqmusicApi?.execute("hi", bundle)
         Log.d(TAG, "sayHi ret:" + result?.getInt(Keys.API_RETURN_KEY_CODE))
@@ -431,7 +454,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                             setLoveStateText(true)
                         }
                     } else {
-                        print("添加收藏失败（$code)")
+                        printToTextView("添加收藏失败（$code)")
                     }
                 }
             })
@@ -446,7 +469,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                             setLoveStateText(false)
                         }
                     } else {
-                        print("取消收藏失败（$code)")
+                        printToTextView("取消收藏失败（$code)")
                     }
                 }
             })
@@ -530,7 +553,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         tmpList.add(folder)
                     }
 
-                    print("获取歌单成功（${tmpList.size})")
+                    printToTextView("获取歌单成功（${tmpList.size})")
                     runOnUiThread {
                         curFolderlist.clear()
                         tmpList.forEach {
@@ -539,14 +562,16 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         folderAdapter?.notifyDataSetChanged()
                     }
                 } else {
-                    print("获取歌单失败（$code)")
+                    printToTextView("获取歌单失败（$code)")
                 }
 
             }
         })
     }
 
-    //获取用户歌单
+    /**
+     * 获取用户歌单列表
+     */
     private fun getUserFolderList(folder: Data.FolderInfo, page: Int) {
         if (this.openId.isNullOrEmpty() || this.openToken.isNullOrEmpty())
             return
@@ -558,7 +583,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         params.putInt("folderType", folder.type)
         params.putInt("page", page)
 
-        Log.d(TAG, "[getUserFolderList] executeAsync getUserFolderList")
+        Log.d(TAG, "[getUserFolderList] executeAsync getUserFolderList folderType:${folder.type} folderId:${folder.id} page:$page")
         qqmusicApi?.executeAsync("getUserFolderList", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -619,7 +644,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         params.putString("folderId", folder.id ?: "")
         params.putInt("folderType", folder.type)
         params.putInt("page", page)
-        print("获取歌曲列表... ${folder.id},${folder.type}")
+        printToTextView("获取歌曲列表... ${folder.id},${folder.type}")
 
         runOnUiThread {
             curFolderlist.clear()
@@ -643,17 +668,19 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         val song = gson.fromJson(elem, Data.Song::class.java)
                         curSonglist.add(song)
                     }
-                    print("获取歌曲列表成功（${curSonglist.size})")
+                    printToTextView("获取歌曲列表成功（${curSonglist.size})")
                     runOnUiThread { songAdapter?.notifyDataSetChanged() }
                 } else {
-                    print("获取歌曲列表失败（$code)")
+                    printToTextView("获取歌曲列表失败（$code)")
                 }
 
             }
         })
     }
 
-    //获取用户歌曲列表
+    /**
+     * 获取用户Folder对应的歌曲列表
+     */
     private fun getUserSongList(folder: Data.FolderInfo, page: Int) {
         val params = Bundle()
         params.putString("openId", this.openId)
@@ -661,7 +688,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         params.putString("folderId", folder.id ?: "")
         params.putInt("folderType", folder.type)
         params.putInt("page", page)
-        print("获取歌曲列表... ${folder.id},${folder.type}")
+        printToTextView("获取歌曲列表... ${folder.id},${folder.type}")
 
         runOnUiThread {
             curFolderlist.clear()
@@ -669,7 +696,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             songListView.visibility = VISIBLE
             folderListView.visibility = GONE
         }
-
+        Log.d(TAG, "[getUserSongList] executeAsync getUserSongList folderType:${folder.type} folderId:${folder.id} page:$page")
         qqmusicApi?.executeAsync("getUserSongList", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -685,10 +712,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         val song = gson.fromJson(elem, Data.Song::class.java)
                         curSonglist.add(song)
                     }
-                    print("获取歌曲列表成功（${curSonglist.size})")
+                    printToTextView("获取歌曲列表成功（${curSonglist.size})")
                     runOnUiThread { songAdapter?.notifyDataSetChanged() }
                 } else {
-                    print("获取歌曲列表失败（$code)")
+                    printToTextView("获取歌曲列表失败（$code)")
                 }
 
             }
@@ -710,14 +737,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 idList.removeAll(subList)
                 idList.addAll(subList)
             } catch (e: Exception) {
-                print(e)
+                printToTextView(e)
             }
 
         }
 
         val params = Bundle()
         params.putStringArrayList("songIdList", idList)
-        print("播放歌曲列表... ${song.title},${songList.size}")
+        printToTextView("播放歌曲列表... ${song.title},${songList.size}")
 
         qqmusicApi?.executeAsync("playSongId", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
@@ -728,7 +755,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     runOnUiThread { syncCurrentPlayInfo() }
                 } else {
-                    print("播放歌曲列表失败（$code)")
+                    printToTextView("播放歌曲列表失败（$code)")
                 }
             }
         })
@@ -744,7 +771,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val params = Bundle()
         params.putStringArrayList("songIdList", idList)
         params.putInt("index", index)
-        print("播放歌曲列表... $index,${songList.size}")
+        printToTextView("播放歌曲列表... $index,${songList.size}")
         qqmusicApi?.executeAsync("playSongIdAtIndex", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -754,7 +781,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     runOnUiThread { syncCurrentPlayInfo() }
                 } else {
-                    print("播放歌曲列表失败（$code)")
+                    printToTextView("播放歌曲列表失败（$code)")
                 }
             }
         })
@@ -770,7 +797,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val params = Bundle()
         params.putStringArrayList("midList", midList)
         params.putInt("index", index)
-        print("播放歌曲列表... $index,${songList.size}")
+        printToTextView("播放歌曲列表... $index,${songList.size}")
         qqmusicApi?.executeAsync("playSongMidAtIndex", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -780,7 +807,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     runOnUiThread { syncCurrentPlayInfo() }
                 } else {
-                    print("播放歌曲列表失败（$code)")
+                    printToTextView("播放歌曲列表失败（$code)")
                 }
             }
         })
@@ -842,10 +869,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     val boolArray = result.getBooleanArray(Keys.API_RETURN_KEY_DATA)
                     if (boolArray != null && boolArray.isNotEmpty()) {
                         runOnUiThread { setLoveStateText(boolArray[0]) }
-                        print("获取收藏状态成功")
+                        printToTextView("获取收藏状态成功")
                     }
                 } else {
-                    print("获取收藏状态失败（$code)")
+                    printToTextView("获取收藏状态失败（$code)")
                 }
             }
         })
@@ -920,15 +947,18 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         return Data.FolderType.MY_FOLDER == folderType || folderType == Data.FolderType.MY_FOLDER_SONG_LIST
     }
 
-    private fun print(any: Any?) {
+    private fun printToTextView(any: Any?) {
         runOnUiThread {
             if (any == null) {
                 txtResult.text = ""
             } else {
                 if (any is Bundle) {
-                    txtResult.text = any.keySet().joinToString(separator = "\n", transform = { "$it: ${any.get(it)}" })
+                    val log =any.keySet().joinToString(separator = "\n", transform = { "$it: ${any.get(it)}" })
+                    txtResult.text = log
+                    Log.d(TAG, log)
                 } else {
                     txtResult.text = any.toString()
+                    Log.d(TAG, any.toString())
                 }
             }
         }
