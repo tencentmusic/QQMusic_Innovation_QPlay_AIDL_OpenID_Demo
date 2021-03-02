@@ -912,6 +912,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         val params = Bundle()
         params.putString(Keys.API_RETURN_KEY_ENCRYPT_STRING, encryptString)
+        if (Config.BIND_PLATFORM == AIDL_PLATFORM_TYPE_TV) {
+            params.putLong("from", 1)
+        }
         Log.d(TAG, "[startAIDLAuth] executeAsync requestAuth")
         qqmusicApi?.executeAsync("requestAuth", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
