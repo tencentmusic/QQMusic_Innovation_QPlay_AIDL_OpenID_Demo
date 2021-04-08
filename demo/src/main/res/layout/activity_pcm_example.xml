@@ -12,8 +12,26 @@
         android:text="bindService" />
 
     <Button
-        android:id="@+id/bt_request_pcm_data"
+        android:id="@+id/bt_start_pcm_mode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="request pcm data" />
+        android:text="Start pcm mode" />
+
+    <Button
+        android:id="@+id/bt_stop_pcm_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop pcm mode" />
+
+    <Button
+        android:id="@+id/bt_play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Resume/Pause" />
+
+    <Button
+        android:id="@+id/bt_next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Play next" />
 </LinearLayout>
