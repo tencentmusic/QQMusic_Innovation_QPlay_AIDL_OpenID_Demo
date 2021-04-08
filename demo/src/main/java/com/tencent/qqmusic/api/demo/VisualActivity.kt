@@ -412,10 +412,18 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 Log.d(TAG, "暂停音乐失败($errorCode)")
             }
         } else {
-            val result = qqmusicApi?.execute("playMusic", null)
-            val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
-            if (errorCode != ErrorCodes.ERROR_OK) {
-                Log.d(TAG, "开始播放音乐失败($errorCode)")
+            if (curPlayState == PlayState.PAUSED) {
+                val result = qqmusicApi?.execute("resumeMusic", null)
+                val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+                if (errorCode != ErrorCodes.ERROR_OK) {
+                    Log.d(TAG, "继续播放音乐失败($errorCode)")
+                }
+            } else {
+                val result = qqmusicApi?.execute("playMusic", null)
+                val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
+                if (errorCode != ErrorCodes.ERROR_OK) {
+                    Log.d(TAG, "开始播放音乐失败($errorCode)")
+                }
             }
         }
 

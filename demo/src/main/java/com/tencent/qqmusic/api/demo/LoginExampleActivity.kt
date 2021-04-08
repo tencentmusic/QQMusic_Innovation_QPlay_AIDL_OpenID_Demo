@@ -115,6 +115,9 @@ class LoginExampleActivity : AppCompatActivity() {
                             val openToken = appDecryptJson.getString(Keys.API_RETURN_KEY_OPEN_TOKEN)
                             var expireTime = appDecryptJson.getString(Keys.API_PARAM_KEY_SDK_EXPIRETIME)
                             Log.d(TAG, "openid:$openId,openToken:$openToken")
+                            runOnUiThread {
+                                Toast.makeText(this, "登录成功openid:$openId,openToken:$openToken", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }, failed = { code, errorMsg ->
