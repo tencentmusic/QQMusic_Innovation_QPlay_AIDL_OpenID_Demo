@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import com.tencent.qqmusic.api.demo.pcm.PcmExampleActivity
+import com.tencent.qqmusic.api.demo.pcm.PcmExampleActivityNew
 import kotlinx.android.synthetic.main.activity_example_list.*
 
 class ExampleListActivity : AppCompatActivity() {
@@ -20,7 +21,7 @@ class ExampleListActivity : AppCompatActivity() {
                     startActivity(Intent(this, LoginExampleActivity::class.java))
                 },
                 Example("Pcm传输demo") {
-                    startActivity(Intent(this, PcmExampleActivity::class.java))
+                    startActivity(Intent(this, PcmExampleActivityNew::class.java))
                 }
         )
         lv_examples.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exampleList)
