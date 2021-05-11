@@ -17,7 +17,10 @@ import org.json.JSONObject
 import org.json.JSONTokener
 
 /**
- * 使用QQMusic手机端完成登录获取Openid OpenToken的例子
+ * 使用QQ音乐手机端完成登录获取Openid OpenToken的例子
+ * 由于同一scheme在CallbackActivity和LoginExampleActivity都需要使用，避免混乱，AndroidManifest.xml中
+ * 默认将LoginExampleActivity的intent-filter注释，完整体验LoginExampleActivity前将其反注释，
+ * 并将CallbackActivity的intent-filter注释进行注释
  */
 class LoginExampleActivity : AppCompatActivity() {
     companion object {

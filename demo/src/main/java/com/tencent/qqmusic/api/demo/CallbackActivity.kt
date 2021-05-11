@@ -14,19 +14,13 @@ class CallbackActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_callback)
         getSchemeInfos()
-//        val intent = Intent(this, MainActivity::class.java)
-//        startActivity(intent)
         finish()
     }
 
 
     override fun onResume() {
         super.onResume()
-        //getSchemeInfos()
-//        val intent = Intent(this, MainActivity::class.java)
-//        startActivity(intent)
         finish()
     }
 

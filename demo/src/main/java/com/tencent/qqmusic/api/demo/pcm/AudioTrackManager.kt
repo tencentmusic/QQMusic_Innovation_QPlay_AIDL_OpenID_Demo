@@ -4,6 +4,7 @@ import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
+import android.media.AudioTrack.*
 import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.util.Log
@@ -41,6 +42,8 @@ object AudioTrackManager {
 
     //指定缓冲区大小。调用AudioRecord类的getMinBufferSize方法可以获得。
     private var mMinBufferSize = 0
+
+    var printMessageCallback: ((String) -> Unit)? = null
 
     fun initData(sampleRateInHz: Int = mSampleRateInHz, channelConfig: Int = mChannelConfig, audioFormat: Int = mAudioFormat) {
         Log.d(TAG, "[initData】$sampleRateInHz, $channelConfig, $audioFormat")
@@ -98,7 +101,7 @@ object AudioTrackManager {
 
                 if (mInputStream!!.available() <= 0) {
                     Log.d(TAG, "sleep")
-
+                    printMessageCallback?.invoke("Play thread sleep \n PlayState:${mAudioTrack?.playState?.playStateToString()}")
                     Thread.sleep(500)
                     continue
                 }
@@ -114,11 +117,22 @@ object AudioTrackManager {
                     if (mAudioTrack!!.state == AudioTrack.STATE_UNINITIALIZED) {
                         initData()
                     }
+
+                    printMessageCallback?.invoke("AudioTrack write $readCount Bytes\n PlayState:${mAudioTrack?.playState?.playStateToString()}")
                     mAudioTrack!!.write(tempBuffer, 0, readCount)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun Int.playStateToString():String {
+        return when(this){
+            PLAYSTATE_STOPPED -> {"PLAYSTATE_STOPPED"}
+            PLAYSTATE_PAUSED -> {"PLAYSTATE_PAUSED"}
+            PLAYSTATE_PLAYING -> {"PLAYSTATE_PLAYING"}
+            else -> {"unknown"}
         }
     }
 
