@@ -102,7 +102,12 @@ class PcmExampleActivity : AppCompatActivity() {
 
             qqMusicApi?.executeAsync("startPcmMode", null, object : IQQMusicApiCallback.Stub() {
                 override fun onReturn(registerResult: Bundle?) {
-                    Log.d(TAG, "onReturn ${ registerResult?.getInt(Keys.API_RETURN_KEY_CODE)}")
+                    val ret = registerResult?.getInt(Keys.API_RETURN_KEY_CODE) ?: -1
+                    Log.d(TAG, "onReturn $ret")
+                    if (ret != ErrorCodes.ERROR_OK) {
+                        Log.d(TAG, "startPcmMode return failed, ret=$ret")
+                        return
+                    }
 
                     registerResult?.classLoader = classLoader
 
