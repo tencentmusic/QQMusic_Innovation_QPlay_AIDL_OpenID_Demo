@@ -4,9 +4,9 @@ import com.tencent.qqmusic.third.api.contract.CommonCmd;
 
 public class Config {
 
-    public static final String OPENID_APPID = "";
+    public static String OPENID_APPID = "";
 
-    public static final String OPENID_APP_PRIVATE_KEY = "";
+    public static String OPENID_APP_PRIVATE_KEY = "";
 
     /**
      * see {@link CommonCmd#AIDL_PLATFORM_TYPE_PHONE }
@@ -14,6 +14,6 @@ public class Config {
      * {@link CommonCmd#AIDL_PLATFORM_TYPE_CAR}
      * {@link CommonCmd#AIDL_PLATFORM_TYPE_PAD}
      */
-    public static final String BIND_PLATFORM = "";
+    public static String BIND_PLATFORM = "";
 
 }
