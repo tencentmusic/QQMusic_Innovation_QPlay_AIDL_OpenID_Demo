@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import com.tencent.qqmusic.third.api.contract.CommonCmd
@@ -19,7 +20,7 @@ class QPlayBindHelper(private val context: Context, private val bindPlatform: St
 
     private var api: IQQMusicApi? = null
 
-    private val handler: Handler by lazy { Handler() }
+    private val handler: Handler by lazy { Handler(Looper.getMainLooper()) }
 
     private val deathRecipient by lazy {
         IBinder.DeathRecipient {
