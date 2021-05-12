@@ -6,10 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioFormat
-import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.ParcelFileDescriptor
+import android.os.*
 import android.util.Log
 import android.widget.Toast
 import com.tencent.qqmusic.api.demo.*
@@ -30,7 +27,7 @@ class PlayService : Service() {
     private val qPlayBindHelper = QPlayBindHelper(this)
     var qqMusicApi: IQQMusicApi? = null
     private var curPlayState: Int = 0
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
 
     /**
      * QQ音乐事件回调
