@@ -4,7 +4,6 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import com.tencent.qqmusic.api.demo.pcm.PcmExampleActivity
 import com.tencent.qqmusic.api.demo.pcm.PcmExampleActivityNew
 import kotlinx.android.synthetic.main.activity_example_list.*
 
