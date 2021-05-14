@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 object AudioTrackManager {
     private const val TAG = "AudioTrackManager"
+    private const val LOG_LOOP = false
 
     //音频流类型
     private const val mStreamType = AudioManager.STREAM_MUSIC
@@ -44,6 +45,7 @@ object AudioTrackManager {
     private var mMinBufferSize = 0
 
     var printMessageCallback: ((String) -> Unit)? = null
+    var enterForeground: ((Boolean) -> Unit)? = null
 
     fun initData(sampleRateInHz: Int = mSampleRateInHz, channelConfig: Int = mChannelConfig, audioFormat: Int = mAudioFormat) {
         Log.d(TAG, "[initData】$sampleRateInHz, $channelConfig, $audioFormat")
@@ -53,7 +55,7 @@ object AudioTrackManager {
         //创建AudioTrack
         mAudioTrack = AudioTrack(mStreamType, sampleRateInHz, channelConfig, audioFormat, mMinBufferSize, mMode)
 
-        mAudioTrack!!.play()
+        play()
     }
 
     /**
@@ -97,18 +99,22 @@ object AudioTrackManager {
             val tempBuffer = ByteArray(mMinBufferSize)
             var readCount = 0
             while (true) {
-                Log.d(TAG, "while true")
-
+                if (LOG_LOOP) {
+                    Log.d(TAG, "while true")
+                }
                 if (mInputStream!!.available() <= 0) {
-                    Log.d(TAG, "sleep")
+                    if (LOG_LOOP) {
+                        Log.d(TAG, "sleep")
+                    }
                     printMessageCallback?.invoke("Play thread sleep \n PlayState:${mAudioTrack?.playState?.playStateToString()}")
                     Thread.sleep(500)
                     continue
                 }
 
                 readCount = mInputStream!!.read(tempBuffer)
-                Log.d(TAG, "readCount:$readCount")
-
+                if (LOG_LOOP) {
+                    Log.d(TAG, "readCount:$readCount")
+                }
                 if (readCount == AudioTrack.ERROR_INVALID_OPERATION || readCount == AudioTrack.ERROR_BAD_VALUE) {
                     continue
                 }
@@ -127,12 +133,20 @@ object AudioTrackManager {
         }
     }
 
-    fun Int.playStateToString():String {
-        return when(this){
-            PLAYSTATE_STOPPED -> {"PLAYSTATE_STOPPED"}
-            PLAYSTATE_PAUSED -> {"PLAYSTATE_PAUSED"}
-            PLAYSTATE_PLAYING -> {"PLAYSTATE_PLAYING"}
-            else -> {"unknown"}
+    fun Int.playStateToString(): String {
+        return when (this) {
+            PLAYSTATE_STOPPED -> {
+                "PLAYSTATE_STOPPED"
+            }
+            PLAYSTATE_PAUSED -> {
+                "PLAYSTATE_PAUSED"
+            }
+            PLAYSTATE_PLAYING -> {
+                "PLAYSTATE_PLAYING"
+            }
+            else -> {
+                "unknown"
+            }
         }
     }
 
@@ -199,14 +213,18 @@ object AudioTrackManager {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        enterForeground?.invoke(false)
     }
+
 
     fun pause() {
         mAudioTrack?.pause()
+        enterForeground?.invoke(false)
     }
 
     fun play() {
         mAudioTrack?.play()
+        enterForeground?.invoke(true)
     }
 
 }

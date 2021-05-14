@@ -1,5 +1,7 @@
 package com.tencent.qqmusic.api.demo.pcm
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -7,12 +9,16 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioFormat
 import android.os.*
+import android.support.v4.app.NotificationCompat
 import android.util.Log
 import android.widget.Toast
 import com.tencent.qqmusic.api.demo.*
+import com.tencent.qqmusic.api.demo.R
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
 import com.tencent.qqmusic.api.demo.util.QPlayBindHelper
 import com.tencent.qqmusic.third.api.contract.*
+import kotlinx.android.synthetic.main.activity_visual.view.*
+
 
 /**
  * Created by clydeazhang on 2021/5/11 6:43 PM.
@@ -22,6 +28,8 @@ class PlayerService : Service() {
 
     companion object {
         private const val TAG = "PlayService"
+        private const val KEY_ENTER_FOREGROUND = "KEY_ENTER_FOREGROUND"
+        private const val CHANNEL_ID = "default"
     }
 
     private val qPlayBindHelper = QPlayBindHelper(this)
@@ -63,12 +71,47 @@ class PlayerService : Service() {
         val filter = IntentFilter()
         filter.addAction("callback_verify_notify")
         registerReceiver(activeBroadcastReceiver, filter)
+        AudioTrackManager.enterForeground = {
+            Log.d(TAG, "enter foreground=$it")
+            val intent = Intent(this, PlayerService::class.java)
+            intent.putExtra(KEY_ENTER_FOREGROUND, it)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        }
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelName = "默认"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, channelName, importance)
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val enterForeground = intent?.getBooleanExtra(KEY_ENTER_FOREGROUND, false) ?: false
+        Log.d(TAG, "onStartCommand, enter foreground=$enterForeground")
+        if (enterForeground) {
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_launcher_background)
+                    .setContentTitle("demo标题")
+                    .setContentText("demo正在播放音乐")
+                    .build()
+            startForeground(1, notification)
+        } else {
+            stopForeground(true)
+        }
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(activeBroadcastReceiver)
         AudioTrackManager.stopPlay()
+        AudioTrackManager.enterForeground = null
     }
 
     override fun onBind(intent: Intent?): IBinder? {
