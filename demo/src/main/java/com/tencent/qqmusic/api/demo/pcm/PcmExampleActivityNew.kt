@@ -1,23 +1,13 @@
 package com.tencent.qqmusic.api.demo.pcm
 
 import android.content.*
-import android.media.AudioFormat
 import android.os.Bundle
 import android.os.IBinder
-import android.os.ParcelFileDescriptor
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import com.tencent.qqmusic.api.demo.*
 import com.tencent.qqmusic.api.demo.R
-import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
-import com.tencent.qqmusic.api.demo.util.QPlayBindHelper
-import com.tencent.qqmusic.third.api.contract.*
-import com.tencent.qqmusic.third.api.contract.Events.API_EVENT_PLAY_SONG_CHANGED
-import com.tencent.qqmusic.third.api.contract.Keys.API_PARAM_KEY_MEDIA_INFO
-import com.tencent.qqmusic.third.api.contract.Keys.API_PARAM_KEY_PCM_FILE_DESCRIPTOR
 
 
 class PcmExampleActivityNew : AppCompatActivity() {
@@ -52,7 +42,7 @@ class PcmExampleActivityNew : AppCompatActivity() {
 
         informationTextView = findViewById(R.id.tv_information)
 
-        val intent = Intent(this, PlayService::class.java)
+        val intent = Intent(this, PlayerService::class.java)
         startService(intent)
         bindService(intent, conn, BIND_AUTO_CREATE)
 

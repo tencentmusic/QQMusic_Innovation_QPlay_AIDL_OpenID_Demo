@@ -18,7 +18,7 @@ import com.tencent.qqmusic.third.api.contract.*
  * Created by clydeazhang on 2021/5/11 6:43 PM.
  * Copyright (c) 2021 Tencent. All rights reserved.
  */
-class PlayService : Service() {
+class PlayerService : Service() {
 
     companion object {
         private const val TAG = "PlayService"
@@ -50,7 +50,7 @@ class PlayService : Service() {
             val ret = p1?.extras?.get("ret")
             if (ret == "0") {
                 Log.d(TAG, "activeBroadcastReceiver 授权成功")
-                Toast.makeText(this@PlayService, "授权成功", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@PlayerService, "授权成功", Toast.LENGTH_SHORT).show()
                 qqMusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_STATE_CHANGED, Events.API_EVENT_PLAY_SONG_CHANGED), eventListener)
             } else {
                 Log.d(TAG, "activeBroadcastReceiver 授权失败($ret)")
@@ -74,23 +74,23 @@ class PlayService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return object : IPlayService.Stub() {
             override fun bindService() {
-                this@PlayService.bindService()
+                this@PlayerService.bindService()
             }
 
             override fun startPcmMode() {
-                this@PlayService.startPcmMode()
+                this@PlayerService.startPcmMode()
             }
 
             override fun stopPcmMode() {
-                this@PlayService.stopPcmMode()
+                this@PlayerService.stopPcmMode()
             }
 
             override fun resumeOrPause() {
-                this@PlayService.resumeOrPause()
+                this@PlayerService.resumeOrPause()
             }
 
             override fun playNext() {
-                this@PlayService.playNext()
+                this@PlayerService.playNext()
             }
 
             override fun setPrintMessageCallback(callback: IPrint?) {
@@ -187,7 +187,7 @@ class PlayService : Service() {
                     val encryptString = OpenIDHelper.getEncryptString(nonce)
                     CommonCmd.verifyCallerIdentity(this, Config.OPENID_APPID, packageName, encryptString, "qqmusicapidemo://")
                 } else {
-                    Toast.makeText(this@PlayService, "授权成功", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@PlayerService, "授权成功", Toast.LENGTH_SHORT).show()
                     qqMusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_STATE_CHANGED, Events.API_EVENT_PLAY_SONG_CHANGED), eventListener)
                 }
             }
