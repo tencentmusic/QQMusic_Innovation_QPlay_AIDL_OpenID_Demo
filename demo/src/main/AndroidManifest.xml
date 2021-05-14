@@ -53,7 +53,7 @@
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <service
-            android:name=".pcm.PlayService"
+            android:name=".pcm.PlayerService"
             android:process=".play" />
         <activity
             android:name=".LoginExampleActivity"
