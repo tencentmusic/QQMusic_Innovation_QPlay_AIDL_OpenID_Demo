@@ -22,17 +22,25 @@ class QPlayBindHelper(private val context: Context, private val bindPlatform: St
 
     private val handler: Handler by lazy { Handler(Looper.getMainLooper()) }
 
+    private var reBinding = false
     private val deathRecipient by lazy {
         IBinder.DeathRecipient {
             Log.e(TAG, "[binderDied] ")
             api = null
+            if (reBinding.not()) {
+                //reBindQQMusicService()
+            }
         }
     }
 
     private val conn = object : ServiceConnection {
         var success: (() -> Unit)? = null
         override fun onServiceDisconnected(name: ComponentName?) {
+            Log.e(TAG, "[onServiceDisconnected] ")
             api = null
+            if (reBinding.not()) {
+                //reBindQQMusicService()
+            }
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -56,7 +64,7 @@ class QPlayBindHelper(private val context: Context, private val bindPlatform: St
         val intent = getQQMusicApiServiceIntent()
 
         val ret = try {
-            Log.d(TAG, "[bindQQMusic] bindService $retry")
+            Log.d(TAG, "[bindQQMusic] bindService retry:$retry")
             context.bindService(intent, conn, Context.BIND_AUTO_CREATE)
         } catch (e: Exception) {
             Log.e(TAG, "startBindQQMusic failed")
@@ -137,6 +145,25 @@ class QPlayBindHelper(private val context: Context, private val bindPlatform: St
             }
         }
         return intent
+    }
+
+    /**
+     * 重新绑定qq音乐
+     */
+    private fun reBindQQMusicService() {
+        CommonCmd.startQQMusicProcess(context, context.packageName)
+        handler.postDelayed(Runnable {
+            ensureQQMusicBind {
+                if (it) {
+                    Log.e(TAG, "重新绑定成功")
+                    reBinding = false
+                } else {
+                    Log.e(TAG, "重新绑定失败")
+                    reBindQQMusicService()
+                }
+            }
+        }, 200)
+        reBinding = true
     }
 
 }
