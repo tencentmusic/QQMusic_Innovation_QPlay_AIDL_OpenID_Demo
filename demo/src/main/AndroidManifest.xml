@@ -43,10 +43,7 @@
                 <data android:scheme="qqmusicapidemo" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".pcm.PcmExampleActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+
         <activity
             android:name=".pcm.PcmExampleActivityNew"
             android:screenOrientation="portrait"
