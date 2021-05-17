@@ -102,7 +102,7 @@ class PlayerService : Service() {
                     .build()
             startForeground(1, notification)
         } else {
-            stopForeground(true)
+            //stopForeground(true)
         }
         return super.onStartCommand(intent, flags, startId)
     }
