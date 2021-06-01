@@ -137,7 +137,7 @@
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onClickSchemeAction"
+                android:onClick="testPlayList"
                 android:text="自定义跳转" />
 
 
