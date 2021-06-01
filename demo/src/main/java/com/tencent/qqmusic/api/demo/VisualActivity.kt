@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
+import android.provider.CalendarContract
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -1097,6 +1098,17 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         bundle.putBoolean(Keys.API_PARAM_KEY_MB, true)
         bundle.putBoolean(Keys.API_PARAM_KEY_M2, true)
         action(this, bundle)
+    }
+
+    fun testPlayList(v: View) {
+        val params = Bundle()
+        params.putInt("page", 0)
+        qqmusicApi?.executeAsync("getPlayList", params, object : IQQMusicApiCallback.Stub() {
+            override fun onReturn(result: Bundle) {
+                val json = result.getString(Keys.API_RETURN_KEY_DATA)
+                Log.d(TAG, "got play list: $json")
+            }
+        })
     }
 
     private fun sendHttp(urlString: String) {
