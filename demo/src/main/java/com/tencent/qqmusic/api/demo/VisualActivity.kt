@@ -451,7 +451,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     fun onLoveClick(view: View) {
         val midList = ArrayList<String>()
-        midList.add(curPlaySong?.mid ?: "")
+        midList.add(curPlaySong?.mid ?: curPlaySong?.id ?: "")
         val params = Bundle()
         params.putStringArrayList("midList", midList)
         if (Config.BIND_PLATFORM == AIDL_PLATFORM_TYPE_TV) {
@@ -1133,14 +1133,36 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     fun testGetLyric(v: View) {
+        if (curPlaySong == null) {
+            Toast.makeText(this, "没有歌曲", Toast.LENGTH_SHORT).show()
+            return
+        }
         val params = Bundle()
-        params.putLong("songId", 5144870)
+        val songId = curPlaySong?.id?.split("|")?.get(0)?.toLong() ?: 0L
+        params.putLong("songId", songId)
         qqmusicApi?.executeAsync("getLyric", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 val json = result.getString(Keys.API_RETURN_KEY_DATA)
-                Log.d(TAG, "got Lyric: $json")
+                val error = result.getString(Keys.API_RETURN_KEY_ERROR)
+                Log.d(TAG, "got Lyric: $json, error=$error")
             }
         })
+    }
+
+    fun testSeekBack(v: View) {
+        val params = Bundle()
+        params.putLong("time", 1000)
+        val result = qqmusicApi?.execute("seekBack", params)
+        val error = result?.getString(Keys.API_RETURN_KEY_ERROR)
+        Log.d(TAG, "error=$error")
+    }
+
+    fun testSeekForward(v: View) {
+        val params = Bundle()
+        params.putLong("time", 1000)
+        val result = qqmusicApi?.execute("seekForward", params)
+        val error = result?.getString(Keys.API_RETURN_KEY_ERROR)
+        Log.d(TAG, "error=$error")
     }
 
     private fun sendHttp(urlString: String) {
