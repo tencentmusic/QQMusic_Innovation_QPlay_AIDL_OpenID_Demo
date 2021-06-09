@@ -1139,8 +1139,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         }
         val params = Bundle()
         val songId = curPlaySong?.id?.split("|")?.get(0)?.toLong() ?: 0L
-        params.putLong("songId", songId)
-        qqmusicApi?.executeAsync("getLyric", params, object : IQQMusicApiCallback.Stub() {
+        //params.putString("songId", "20|0")
+        params.putString("songId", curPlaySong?.id ?: "")
+        qqmusicApi?.executeAsync("getLyricWithId", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 val json = result.getString(Keys.API_RETURN_KEY_DATA)
                 val error = result.getString(Keys.API_RETURN_KEY_ERROR)
