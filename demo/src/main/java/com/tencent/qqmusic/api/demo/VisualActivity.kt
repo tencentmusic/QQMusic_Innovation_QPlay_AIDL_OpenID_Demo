@@ -359,7 +359,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     //QQ音乐事件回调
     private val eventListener = object : IQQMusicApiEventListener.Stub() {
         override fun onEvent(event: String, extra: Bundle) {
-            Log.d(TAG, "onEvent$event extra:$extra")
+            Log.d(TAG, "onEvent $event extra:${extra.toPrintableString()}")
 
             runOnUiThread {
                 when (event) {
@@ -407,19 +407,22 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             return
 
         if (isPlaying()) {
+            Log.d(TAG, "pauseMusic")
             val result = qqmusicApi?.execute("pauseMusic", null)
             val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
             if (errorCode != ErrorCodes.ERROR_OK) {
                 Log.d(TAG, "暂停音乐失败($errorCode)")
             }
         } else {
-            if (curPlayState == PlayState.PAUSED) {
+            if (curPlayState == PlayState.PAUSED || curPlayState == PlayState.PAUSING) {
+                Log.d(TAG, "resumeMusic")
                 val result = qqmusicApi?.execute("resumeMusic", null)
                 val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
                 if (errorCode != ErrorCodes.ERROR_OK) {
                     Log.d(TAG, "继续播放音乐失败($errorCode)")
                 }
             } else {
+                Log.d(TAG, "playMusic")
                 val result = qqmusicApi?.execute("playMusic", null)
                 val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
                 if (errorCode != ErrorCodes.ERROR_OK) {
