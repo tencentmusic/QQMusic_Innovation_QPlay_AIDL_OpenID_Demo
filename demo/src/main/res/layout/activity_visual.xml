@@ -137,7 +137,7 @@
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="testPlayList"
+                android:onClick="requestAuth"
                 android:text="自定义跳转" />
 
         </LinearLayout>
@@ -158,13 +158,13 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="testSeekBack"
+                android:onClick="testGetFolderList"
                 android:text="快退1s" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="testSeekForward"
+                android:onClick="testPlayList"
                 android:text="快进1s" />
         </LinearLayout>
 
