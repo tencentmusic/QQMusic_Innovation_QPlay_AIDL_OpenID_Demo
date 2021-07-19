@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
-import android.provider.CalendarContract
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -21,6 +20,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.tencent.qqmusic.api.demo.Config.*
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
+import com.tencent.qqmusic.api.demo.util.QPlayBindHelper
 import com.tencent.qqmusic.third.api.contract.*
 import com.tencent.qqmusic.third.api.contract.CommonCmd.*
 import org.json.JSONObject
@@ -482,7 +482,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         midList.add(curPlaySong?.mid ?: curPlaySong?.id ?: "")
         //midList.add(curPlaySong?.id ?: "")
         val params = Bundle()
-        params.putStringArrayList("midList", arrayListOf("0023pHVA4ZcUvw"))
+        //params.putStringArrayList("midList", arrayListOf("0023pHVA4ZcUvw"))
+        params.putStringArrayList("midList", midList)
         if (Config.BIND_PLATFORM == AIDL_PLATFORM_TYPE_TV) {
             params.putLong("from", 1)
         }
@@ -604,6 +605,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         curFolderlist.clear()
                         tmpList.forEach {
                             curFolderlist.add(it)
+                        }
+                        if (folder.type == 0) {
+                            curFolderlist.add(Data.FolderInfo().apply {
+                                this.isSongFolder = false
+                                this.type = Data.FolderType.RADIO
+                                this.mainTitle = "电台"
+                            })
                         }
                         folderAdapter?.notifyDataSetChanged()
                     }
@@ -1229,13 +1237,40 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         })
     }
 
-    fun testIsNewUser(v: View) {
-        val params = Bundle()
-        val result = qqmusicApi?.execute("isNewUser", params)
-        val error = result?.getString(Keys.API_RETURN_KEY_ERROR)
-        Log.d(TAG, "error=$error, isNewUser=${result?.getBoolean(Keys.API_RETURN_KEY_DATA)}")
+    fun sayHi(v: View) {
+        val qPlayBindHelper = QPlayBindHelper(v.context)
+        qPlayBindHelper.ensureQQMusicBindByStartProcess(isStartProcess = false) {
+            if (it) {
+                qqmusicApi = qPlayBindHelper.getQQMusicApi()
+                val bundle = Bundle()
+                bundle.putInt(Keys.API_PARAM_KEY_SDK_VERSION, CommonCmd.SDK_VERSION)
+                bundle.putString(Keys.API_PARAM_KEY_PLATFORM_TYPE, Config.BIND_PLATFORM)
+                val result = qqmusicApi?.execute("hi", bundle)
+                Log.d(TAG, "sayHi ret:" + result?.getInt(Keys.API_RETURN_KEY_CODE))
+            } else {
+                Log.d(TAG, "绑定失败")
+            }
+        }
+
     }
 
+    fun testIsNewUser(v: View) {
+        val qPlayBindHelper = QPlayBindHelper(v.context)
+        qPlayBindHelper.ensureQQMusicBindByStartProcess(isStartProcess = false) {
+            if (it) {
+                qqmusicApi = qPlayBindHelper.getQQMusicApi()
+                val params = Bundle()
+                val result = qqmusicApi?.execute("isNewUser", params)
+                val error = result?.getString(Keys.API_RETURN_KEY_ERROR)
+                Log.d(
+                    TAG,
+                    "error=$error, isNewUser=${result?.getBoolean(Keys.API_RETURN_KEY_DATA)}"
+                )
+            } else {
+                Log.d(TAG, "绑定失败")
+            }
+        }
+    }
 
 
     fun testSeekBack(v: View) {
@@ -1269,8 +1304,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     fun requestAuth(v: View) {
-        startAIDLAuth {
-            Log.d(TAG, "auth result=$it")
+        val qPlayBindHelper = QPlayBindHelper(v.context)
+        qPlayBindHelper.ensureQQMusicBindByStartProcess {
+            if (it) {
+                qqmusicApi = qPlayBindHelper.getQQMusicApi()
+                verifyCallerRequest()
+            }
         }
     }
 
