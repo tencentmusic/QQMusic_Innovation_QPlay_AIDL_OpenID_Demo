@@ -137,7 +137,7 @@
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="requestAuth"
+                android:onClick="sayHi"
                 android:text="自定义跳转" />
 
         </LinearLayout>
