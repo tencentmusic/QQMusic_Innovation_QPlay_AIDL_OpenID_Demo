@@ -137,8 +137,15 @@
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="sayHi"
+                android:onClick="playSongMid"
                 android:text="自定义跳转" />
+
+            <Button
+                android:id="@+id/btnSchemeAction2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="doSearch"
+                android:text="自定义跳转2" />
 
         </LinearLayout>
 
