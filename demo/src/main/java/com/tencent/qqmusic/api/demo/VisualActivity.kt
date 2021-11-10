@@ -241,6 +241,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             tryBindQQMusicApiServiceRecursively()
         } else {
             sayHiAndInitData()
+            //playSongMid(null)
         }
     }
 
@@ -379,6 +380,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         syncCurrentPlayInfo()
         startProgressTimer()
         isDataInited = true
+
+        //playSongMid(null)
     }
 
     //QQ音乐事件回调
@@ -1182,6 +1185,48 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val json = result.getInt(Keys.API_RETURN_KEY_CODE)
                 val error = result.getString(Keys.API_RETURN_KEY_ERROR)
                 Log.d(TAG, "got play list: $json, error=$error")
+            }
+        })
+
+        //qqmusicApi?.execute()
+    }
+
+    fun playSongMid(v: View?) {
+        val params = Bundle()
+        //params.putStringArrayList("midList", arrayListOf("449198", "003LtC4H15LRSE", "002D1xKJ0yN0UM", "201233523|2", "685668|2"))
+        //params.putStringArrayList("midList", arrayListOf("410|0"))
+        // 003OUlho2HcRHC, 003tbRjy4V1wRt, 0049yRyN2u69wj, 003h3CYS3UxDB4
+        // 告白气球：003OUlho2HcRHC
+        // 一路向北: 001xd0HI0X9GNq
+        params.putStringArrayList(
+            "midList",
+            arrayListOf("003OUlho2HcRHC", "003tbRjy4V1wRt", "0049yRyN2u69wj", "003h3CYS3UxDB4")
+        )
+        qqmusicApi?.executeAsync("playSongMid", params, object : IQQMusicApiCallback.Stub() {
+            override fun onReturn(result: Bundle) {
+                val json = result.getInt(Keys.API_RETURN_KEY_CODE)
+                val error = result.getString(Keys.API_RETURN_KEY_ERROR)
+                Log.d(TAG, "got play list: $json, error=$error")
+            }
+        })
+
+        //qqmusicApi?.execute()
+    }
+
+    fun doSearch(v: View?) {
+        val params = Bundle()
+        //params.putStringArrayList("midList", arrayListOf("449198", "003LtC4H15LRSE", "002D1xKJ0yN0UM", "201233523|2", "685668|2"))
+        //params.putStringArrayList("midList", arrayListOf("410|0"))
+        // 告白气球：003OUlho2HcRHC
+        // 一路向北: 001xd0HI0X9GNq
+        params.putString("keyword", "浪漫音乐")
+        params.putInt("searchType", 0)
+        params.putBoolean("firstPage", true)
+        qqmusicApi?.executeAsync("search", params, object : IQQMusicApiCallback.Stub() {
+            override fun onReturn(result: Bundle) {
+                val error = result.getString(Keys.API_RETURN_KEY_ERROR)
+                val data = result.getString(Keys.API_RETURN_KEY_DATA)
+                Log.d(TAG, "search result: $data, error=$error")
             }
         })
 

@@ -13,15 +13,18 @@ class ExampleListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_example_list)
 
         val exampleList = listOf(
-                Example("QPlayAidl基本功能及接口测试") {
-                    startActivity(Intent(this, VisualActivity::class.java))
-                },
-                Example("QQ音乐登录demo") {
-                    startActivity(Intent(this, LoginExampleActivity::class.java))
-                },
-                Example("Pcm传输demo") {
-                    startActivity(Intent(this, PcmExampleActivityNew::class.java))
-                }
+            Example("QPlayAidl基本功能及接口测试") {
+                startActivity(Intent(this, VisualActivity::class.java))
+            },
+            Example("QQ音乐登录demo") {
+                startActivity(Intent(this, LoginExampleActivity::class.java))
+            },
+            Example("Pcm传输demo") {
+                startActivity(Intent(this, PcmExampleActivityNew::class.java))
+            },
+            Example("进MainActivity") {
+                startActivity(Intent(this, MainActivity::class.java))
+            }
         )
         lv_examples.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exampleList)
         lv_examples.setOnItemClickListener { _, _, position, _ ->
@@ -31,8 +34,8 @@ class ExampleListActivity : AppCompatActivity() {
 }
 
 class Example(
-        private val title: String,
-        val action: () -> Unit
+    private val title: String,
+    val action: () -> Unit
 ) {
     override fun toString(): String {
         return title

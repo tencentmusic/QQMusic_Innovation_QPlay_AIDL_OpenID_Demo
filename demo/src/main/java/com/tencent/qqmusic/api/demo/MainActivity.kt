@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                     }
                 }
                 //tv端需要添加from key
-                putLong("from", 1)
+                //putLong("from", 1)
             }
             execute(actionEditText.text.toString(), params, false)
         }
