@@ -8,18 +8,16 @@ QQ音乐使用的RSA密钥位数为1024位，密钥格式使用PKCS#8，有两�
 一、使用OpenSSL来生成：
 1. 命令生成原始 RSA私钥文件 rsa_private_key.pem
 
-```
-openssl genrsa -out rsa_private_key.pem 1024
-```
+>$ openssl genrsa -out rsa_private_key.pem 1024
+
 2. 命令将原始 RSA私钥转换为 pkcs8格式，得私钥文件到private_key.pem
-```
-openssl pkcs8 -topk8 -inform PEM -in rsa_private_key.pem -outform PEM -nocrypt -out private_key.pem
-```
+
+>$ openssl pkcs8 -topk8 -inform PEM -in rsa_private_key.pem -outform PEM -nocrypt -out private_key.pem
+
 3. 生成RSA公钥文件 rsa_public_key.pem
 
-```
-openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem
-```
+>$ openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem
+
 二、使用Demo中的RSAUtils.genKeyPair生成：
 
 ```
@@ -59,6 +57,7 @@ public class Config {
 }
 
 ```
+这三个值都要配置，**不可以**留空
 
 请一定注意：**上述三个数值（除BIND_PLATFORM）一定来自OpenID业务，不要与OpenAPI业务混淆**。
 
