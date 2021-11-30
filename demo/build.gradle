@@ -37,7 +37,7 @@ dependencies {
         exclude module: 'support-v4'
     }
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
-    api(name: 'qqmusic-innovation-aidl-api-sdk-1.0.21', ext: 'aar')
+    api(name: 'qqmusic-innovation-aidl-api-sdk-1.0.22-SNAPSHOT', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.41"
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.2.41"

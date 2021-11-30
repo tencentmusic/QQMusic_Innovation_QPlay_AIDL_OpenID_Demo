@@ -15,26 +15,28 @@ import java.io.InputStream
 import java.util.concurrent.ConcurrentLinkedQueue
 
 
-object AudioTrackManager {
-    private const val TAG = "AudioTrackManager"
-    private const val LOG_LOOP = false
+class AudioTrackManager {
+    companion object {
+        private const val TAG = "AudioTrackManager"
+        private const val LOG_LOOP = false
 
-    //音频流类型
-    private const val mStreamType = AudioManager.STREAM_MUSIC
+        //音频流类型
+        private const val mStreamType = AudioManager.STREAM_MUSIC
 
-    //指定采样率 （MediaRecoder 的采样率通常是8000Hz AAC的通常是44100Hz。 设置采样率为44100，目前为常用的采样率，官方文档表示这个值可以兼容所有的设置）
-    private const val mSampleRateInHz = 44100
+        //指定采样率 （MediaRecoder 的采样率通常是8000Hz AAC的通常是44100Hz。 设置采样率为44100，目前为常用的采样率，官方文档表示这个值可以兼容所有的设置）
+        private const val mSampleRateInHz = 44100
 
-    //指定捕获音频的声道数目。在AudioFormat类中指定用于此的常量
-    private const val mChannelConfig = AudioFormat.CHANNEL_IN_STEREO //STEREO立体声
+        //指定捕获音频的声道数目。在AudioFormat类中指定用于此的常量
+        private const val mChannelConfig = AudioFormat.CHANNEL_IN_STEREO //STEREO立体声
 
-    //指定音频量化位数 ,在AudioFormaat类中指定了以下各种可能的常量。通常我们选择ENCODING_PCM_16BIT和ENCODING_PCM_8BIT PCM代表的是脉冲编码调制，它实际上是原始音频样本。
-    //因此可以设置每个样本的分辨率为16位或者8位，16位将占用更多的空间和处理能力,表示的音频也更加接近真实。
-    private const val mAudioFormat = AudioFormat.ENCODING_PCM_16BIT
+        //指定音频量化位数 ,在AudioFormaat类中指定了以下各种可能的常量。通常我们选择ENCODING_PCM_16BIT和ENCODING_PCM_8BIT PCM代表的是脉冲编码调制，它实际上是原始音频样本。
+        //因此可以设置每个样本的分辨率为16位或者8位，16位将占用更多的空间和处理能力,表示的音频也更加接近真实。
+        private const val mAudioFormat = AudioFormat.ENCODING_PCM_16BIT
 
-    //STREAM的意思是由用户在应用程序通过write方式把数据一次一次得写到audiotrack中。这个和我们在socket中发送数据一样，
-    // 应用层从某个地方获取数据，例如通过编解码得到PCM数据，然后write到audiotrack。
-    private const val mMode = AudioTrack.MODE_STREAM
+        //STREAM的意思是由用户在应用程序通过write方式把数据一次一次得写到audiotrack中。这个和我们在socket中发送数据一样，
+        // 应用层从某个地方获取数据，例如通过编解码得到PCM数据，然后write到audiotrack。
+        private const val mMode = AudioTrack.MODE_STREAM
+    }
 
     private var mAudioTrack: AudioTrack? = null
 
