@@ -37,16 +37,22 @@ class PlayerService : Service() {
     private var curPlayState: Int = 0
     private val handler = Handler(Looper.getMainLooper())
 
+    private var audioManager: AudioTrackManager? = null
+
     /**
      * QQ音乐事件回调
      */
     private val eventListener = object : IQQMusicApiEventListener.Stub() {
         override fun onEvent(event: String, extra: Bundle) {
+            extra.classLoader = this@PlayerService.classLoader
             Log.d(TAG, "onEvent:$event extra:${extra.toPrintableString()}")
             handler.post {
                 when (event) {
                     Events.API_EVENT_PLAY_STATE_CHANGED -> {
                         curPlayState = extra.getInt(Keys.API_EVENT_KEY_PLAY_STATE)
+                    }
+                    Events.API_EVENT_MEDIA_INFO_CHANGED -> {
+                        onMediaInfoChanged(extra)
                     }
                 }
             }
@@ -59,7 +65,13 @@ class PlayerService : Service() {
             if (ret == "0") {
                 Log.d(TAG, "activeBroadcastReceiver 授权成功")
                 Toast.makeText(this@PlayerService, "授权成功", Toast.LENGTH_SHORT).show()
-                qqMusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_STATE_CHANGED, Events.API_EVENT_PLAY_SONG_CHANGED), eventListener)
+                qqMusicApi?.registerEventListener(
+                    arrayListOf(
+                        Events.API_EVENT_PLAY_STATE_CHANGED,
+                        Events.API_EVENT_PLAY_SONG_CHANGED,
+                        Events.API_EVENT_MEDIA_INFO_CHANGED
+                    ), eventListener
+                )
             } else {
                 Log.d(TAG, "activeBroadcastReceiver 授权失败($ret)")
             }
@@ -71,16 +83,6 @@ class PlayerService : Service() {
         val filter = IntentFilter()
         filter.addAction("callback_verify_notify")
         registerReceiver(activeBroadcastReceiver, filter)
-        AudioTrackManager.enterForeground = {
-            Log.d(TAG, "enter foreground=$it")
-            val intent = Intent(this, PlayerService::class.java)
-            intent.putExtra(KEY_ENTER_FOREGROUND, it)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
-        }
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -96,10 +98,10 @@ class PlayerService : Service() {
         Log.d(TAG, "onStartCommand, enter foreground=$enterForeground")
         if (enterForeground) {
             val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_launcher_background)
-                    .setContentTitle("demo标题")
-                    .setContentText("demo正在播放音乐")
-                    .build()
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle("demo标题")
+                .setContentText("demo正在播放音乐")
+                .build()
             startForeground(1, notification)
         } else {
             //stopForeground(true)
@@ -110,10 +112,11 @@ class PlayerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(activeBroadcastReceiver)
-        AudioTrackManager.stopPlay()
-        AudioTrackManager.enterForeground = null
+        audioManager?.stopPlay()
+        audioManager?.enterForeground = null
     }
 
+    private var printer:IPrint?=null
     override fun onBind(intent: Intent?): IBinder? {
         return object : IPlayService.Stub() {
             override fun bindService() {
@@ -137,9 +140,7 @@ class PlayerService : Service() {
             }
 
             override fun setPrintMessageCallback(callback: IPrint?) {
-                AudioTrackManager.printMessageCallback = {
-                    callback?.print(it)
-                }
+                this@PlayerService.printer = callback
             }
         }
     }
@@ -160,7 +161,7 @@ class PlayerService : Service() {
             if (errorCode != ErrorCodes.ERROR_OK) {
                 Log.d(TAG, "暂停音乐失败($errorCode)")
             }
-            AudioTrackManager.pause()
+            audioManager?.pause()
         } else {
             if (curPlayState == PlayState.PAUSED) {
                 Log.d(TAG, "resumeMusic")
@@ -177,12 +178,12 @@ class PlayerService : Service() {
                     Log.d(VisualActivity.TAG, "开始播放音乐失败($errorCode)")
                 }
             }
-            AudioTrackManager.play()
+            audioManager?.play()
         }
     }
 
     private fun stopPcmMode() {
-        AudioTrackManager.stopPlay()
+        audioManager?.stopPlay()
         qqMusicApi?.execute("stopPcmMode", null)
     }
 
@@ -200,16 +201,44 @@ class PlayerService : Service() {
                     return
                 }
 
-                val mediaInfo = registerResult?.getParcelable<Data.MediaInfo>(Keys.API_PARAM_KEY_MEDIA_INFO)
-                mediaInfo ?: return
-                Log.d(TAG, "initData")
-                AudioTrackManager.initData(mediaInfo.sampleRateInHz, if (mediaInfo.channelConfig == 2) AudioFormat.CHANNEL_IN_STEREO else AudioFormat.CHANNEL_IN_MONO, mediaInfo.audioFormat)
-
-                val parcelFileDescriptor = registerResult.getParcelable<ParcelFileDescriptor>(Keys.API_PARAM_KEY_PCM_FILE_DESCRIPTOR)
-                parcelFileDescriptor ?: return
-                AudioTrackManager.startPlayByFileDescriptor(parcelFileDescriptor)
+                //onMediaInfoChanged(registerResult)
             }
         })
+    }
+
+    private fun onMediaInfoChanged(registerResult: Bundle?) {
+        audioManager?.stopPlay()
+        audioManager = AudioTrackManager()
+
+        audioManager?.printMessageCallback = {
+            printer?.print(it)
+        }
+
+        audioManager!!.enterForeground = {
+            Log.d(TAG, "enter foreground=$it")
+            val intent = Intent(this, PlayerService::class.java)
+            intent.putExtra(KEY_ENTER_FOREGROUND, it)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        }
+
+        val mediaInfo = registerResult?.getParcelable<Data.MediaInfo>(Keys.API_PARAM_KEY_MEDIA_INFO)
+        mediaInfo ?: return
+        Log.d(TAG, "initData, mediaInfo=$mediaInfo")
+        audioManager!!.stopPlay()
+        audioManager!!.initData(
+            mediaInfo.sampleRateInHz,
+            if (mediaInfo.channelConfig == 2) AudioFormat.CHANNEL_IN_STEREO else AudioFormat.CHANNEL_IN_MONO,
+            mediaInfo.audioFormat
+        )
+
+        val parcelFileDescriptor =
+            registerResult.getParcelable<ParcelFileDescriptor>(Keys.API_PARAM_KEY_PCM_FILE_DESCRIPTOR)
+        parcelFileDescriptor ?: return
+        audioManager!!.startPlayByFileDescriptor(parcelFileDescriptor)
     }
 
     private fun bindService() {
@@ -228,10 +257,22 @@ class PlayerService : Service() {
                     val time = System.currentTimeMillis()
                     val nonce = time.toString()
                     val encryptString = OpenIDHelper.getEncryptString(nonce)
-                    CommonCmd.verifyCallerIdentity(this, Config.OPENID_APPID, packageName, encryptString, "qqmusicapidemo://")
+                    CommonCmd.verifyCallerIdentity(
+                        this,
+                        Config.OPENID_APPID,
+                        packageName,
+                        encryptString,
+                        "qqmusicapidemo://"
+                    )
                 } else {
                     Toast.makeText(this@PlayerService, "授权成功", Toast.LENGTH_SHORT).show()
-                    qqMusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_PLAY_STATE_CHANGED, Events.API_EVENT_PLAY_SONG_CHANGED), eventListener)
+                    qqMusicApi?.registerEventListener(
+                        arrayListOf(
+                            Events.API_EVENT_PLAY_STATE_CHANGED,
+                            Events.API_EVENT_PLAY_SONG_CHANGED,
+                            Events.API_EVENT_MEDIA_INFO_CHANGED
+                        ), eventListener
+                    )
                 }
             }
         }
