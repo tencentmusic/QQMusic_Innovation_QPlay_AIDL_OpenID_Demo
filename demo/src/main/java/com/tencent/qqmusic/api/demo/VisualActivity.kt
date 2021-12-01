@@ -1198,9 +1198,11 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         // 003OUlho2HcRHC, 003tbRjy4V1wRt, 0049yRyN2u69wj, 003h3CYS3UxDB4
         // 告白气球：003OUlho2HcRHC
         // 一路向北: 001xd0HI0X9GNq
+        // 后来的风：001uTC4A3i9hH5
         params.putStringArrayList(
             "midList",
-            arrayListOf("003OUlho2HcRHC", "003tbRjy4V1wRt", "0049yRyN2u69wj", "003h3CYS3UxDB4")
+            //arrayListOf("003OUlho2HcRHC", "003tbRjy4V1wRt", "0049yRyN2u69wj", "003h3CYS3UxDB4")
+            arrayListOf("001uTC4A3i9hH5")
         )
         qqmusicApi?.executeAsync("playSongMid", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
@@ -1209,6 +1211,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 Log.d(TAG, "got play list: $json, error=$error")
             }
         })
+
+        //val bundle = Bundle()
+        //bundle.putInt(Keys.API_PARAM_KEY_SDK_VERSION, CommonCmd.SDK_VERSION)
+        //bundle.putString(Keys.API_PARAM_KEY_PLATFORM_TYPE, Config.BIND_PLATFORM)
+        //val result = qqmusicApi?.execute("hi", bundle)
+        //Log.d(TAG, "sayHi ret:" + result?.getInt(Keys.API_RETURN_KEY_CODE))
 
         //qqmusicApi?.execute()
     }

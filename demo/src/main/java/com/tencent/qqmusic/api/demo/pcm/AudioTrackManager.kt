@@ -5,9 +5,11 @@ import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.AudioTrack.*
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.util.Log
+import com.smartdevicelink.util.BitConverter
 import java.io.DataInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -18,7 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class AudioTrackManager {
     companion object {
         private const val TAG = "AudioTrackManager"
-        private const val LOG_LOOP = false
+        private const val LOG_LOOP = true
 
         //音频流类型
         private const val mStreamType = AudioManager.STREAM_MUSIC
@@ -31,7 +33,7 @@ class AudioTrackManager {
 
         //指定音频量化位数 ,在AudioFormaat类中指定了以下各种可能的常量。通常我们选择ENCODING_PCM_16BIT和ENCODING_PCM_8BIT PCM代表的是脉冲编码调制，它实际上是原始音频样本。
         //因此可以设置每个样本的分辨率为16位或者8位，16位将占用更多的空间和处理能力,表示的音频也更加接近真实。
-        private const val mAudioFormat = AudioFormat.ENCODING_PCM_16BIT
+        private const val mAudioFormat = AudioFormat.ENCODING_PCM_FLOAT
 
         //STREAM的意思是由用户在应用程序通过write方式把数据一次一次得写到audiotrack中。这个和我们在socket中发送数据一样，
         // 应用层从某个地方获取数据，例如通过编解码得到PCM数据，然后write到audiotrack。
@@ -49,6 +51,8 @@ class AudioTrackManager {
     var printMessageCallback: ((String) -> Unit)? = null
     var enterForeground: ((Boolean) -> Unit)? = null
 
+    var isFloatPcm = true
+
     fun initData(sampleRateInHz: Int = mSampleRateInHz, channelConfig: Int = mChannelConfig, audioFormat: Int = mAudioFormat) {
         Log.d(TAG, "[initData】$sampleRateInHz, $channelConfig, $audioFormat")
         //根据采样率，采样精度，单双声道来得到frame的大小。
@@ -56,7 +60,7 @@ class AudioTrackManager {
         //注意，按照数字音频的知识，这个算出来的是一秒钟buffer的大小。
         //创建AudioTrack
         mAudioTrack = AudioTrack(mStreamType, sampleRateInHz, channelConfig, audioFormat, mMinBufferSize, mMode)
-
+        isFloatPcm = audioFormat == AudioFormat.ENCODING_PCM_FLOAT
         play()
     }
 
@@ -98,15 +102,15 @@ class AudioTrackManager {
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO)
             Log.d(TAG, "streamPlayerRunnable")
 
-            val tempBuffer = ByteArray(mMinBufferSize)
+            val tempBuffer = ByteArray(mMinBufferSize * 4)
             var readCount = 0
             while (true) {
                 if (LOG_LOOP) {
-                    Log.d(TAG, "while true")
+                    //Log.d(TAG, "while true")
                 }
                 if (mInputStream!!.available() <= 0) {
                     if (LOG_LOOP) {
-                        Log.d(TAG, "sleep")
+                        //Log.d(TAG, "sleep")
                     }
                     printMessageCallback?.invoke("Play thread sleep \n PlayState:${mAudioTrack?.playState?.playStateToString()}")
                     Thread.sleep(500)
@@ -127,7 +131,24 @@ class AudioTrackManager {
                     }
 
                     printMessageCallback?.invoke("AudioTrack write $readCount Bytes\n PlayState:${mAudioTrack?.playState?.playStateToString()}")
-                    mAudioTrack!!.write(tempBuffer, 0, readCount)
+
+                    if (isFloatPcm) {
+                        val size = readCount / 4
+                        val audioData = FloatArray(size)
+                        for (i in 0 until size) {
+                            // 框架地址：https://github.com/smartdevicelink/sdl_java_suite/blob/master/base/src/main/java/com/smartdevicelink/util/BitConverter.java
+                            val bitInt = BitConverter.intFromByteArray(tempBuffer, i * 4)
+                            val fl = java.lang.Float.intBitsToFloat(bitInt)
+                            audioData[i] = fl
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            val ret = mAudioTrack?.write(audioData, 0, audioData.size, WRITE_BLOCKING)
+                            Log.d(TAG, "ret=$ret")
+                        }
+                    } else {
+                        mAudioTrack!!.write(tempBuffer, 0, readCount)
+                    }
+
                 }
             }
         } catch (e: Exception) {
