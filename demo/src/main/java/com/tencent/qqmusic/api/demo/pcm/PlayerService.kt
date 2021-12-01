@@ -38,6 +38,7 @@ class PlayerService : Service() {
     private val handler = Handler(Looper.getMainLooper())
 
     private var audioManager: AudioTrackManager? = null
+    private var audioManagerFloat: AudioTrackManager? = null
 
     /**
      * QQ音乐事件回调
@@ -53,6 +54,7 @@ class PlayerService : Service() {
                     }
                     Events.API_EVENT_MEDIA_INFO_CHANGED -> {
                         onMediaInfoChanged(extra)
+                        onMediaInfoChangedFloat(extra)
                     }
                 }
             }
@@ -113,10 +115,12 @@ class PlayerService : Service() {
         super.onDestroy()
         unregisterReceiver(activeBroadcastReceiver)
         audioManager?.stopPlay()
+        audioManagerFloat?.stopPlay()
         audioManager?.enterForeground = null
+        audioManagerFloat?.enterForeground = null
     }
 
-    private var printer:IPrint?=null
+    private var printer: IPrint? = null
     override fun onBind(intent: Intent?): IBinder? {
         return object : IPlayService.Stub() {
             override fun bindService() {
@@ -162,6 +166,7 @@ class PlayerService : Service() {
                 Log.d(TAG, "暂停音乐失败($errorCode)")
             }
             audioManager?.pause()
+            audioManagerFloat?.pause()
         } else {
             if (curPlayState == PlayState.PAUSED) {
                 Log.d(TAG, "resumeMusic")
@@ -179,11 +184,13 @@ class PlayerService : Service() {
                 }
             }
             audioManager?.play()
+            audioManagerFloat?.play()
         }
     }
 
     private fun stopPcmMode() {
         audioManager?.stopPlay()
+        audioManagerFloat?.stopPlay()
         qqMusicApi?.execute("stopPcmMode", null)
     }
 
@@ -213,6 +220,9 @@ class PlayerService : Service() {
         audioManager?.printMessageCallback = {
             printer?.print(it)
         }
+        audioManagerFloat?.printMessageCallback = {
+            printer?.print(it)
+        }
 
         audioManager!!.enterForeground = {
             Log.d(TAG, "enter foreground=$it")
@@ -238,7 +248,44 @@ class PlayerService : Service() {
         val parcelFileDescriptor =
             registerResult.getParcelable<ParcelFileDescriptor>(Keys.API_PARAM_KEY_PCM_FILE_DESCRIPTOR)
         parcelFileDescriptor ?: return
+        Log.d(TAG, "parcelFileDescriptor: $parcelFileDescriptor")
         audioManager!!.startPlayByFileDescriptor(parcelFileDescriptor)
+    }
+
+    private fun onMediaInfoChangedFloat(registerResult: Bundle?) {
+        audioManagerFloat?.stopPlay()
+        audioManagerFloat = AudioTrackManager()
+
+        audioManagerFloat?.printMessageCallback = {
+            printer?.print(it)
+        }
+
+        audioManagerFloat!!.enterForeground = {
+            Log.d(TAG, "enter foreground=$it")
+            val intent = Intent(this, PlayerService::class.java)
+            intent.putExtra(KEY_ENTER_FOREGROUND, it)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        }
+
+        val mediaInfo = registerResult?.getParcelable<Data.MediaInfo>(Keys.API_PARAM_KEY_MEDIA_INFO)
+        mediaInfo ?: return
+        Log.d(TAG, "initData, mediaInfo=$mediaInfo")
+        audioManagerFloat!!.stopPlay()
+        audioManagerFloat!!.initData(
+            mediaInfo.sampleRateInHz,
+            if (mediaInfo.channelConfig == 2) AudioFormat.CHANNEL_IN_STEREO else AudioFormat.CHANNEL_IN_MONO,
+            mediaInfo.audioFormat
+        )
+
+        val parcelFileDescriptor =
+            registerResult.getParcelable<ParcelFileDescriptor>(Keys.API_PARAM_KEY_PCM_FILE_DESCRIPTOR_FLOAT)
+        parcelFileDescriptor ?: return
+        Log.d(TAG, "parcelFileDescriptor: $parcelFileDescriptor")
+        audioManagerFloat!!.startPlayByFileDescriptor(parcelFileDescriptor)
     }
 
     private fun bindService() {
