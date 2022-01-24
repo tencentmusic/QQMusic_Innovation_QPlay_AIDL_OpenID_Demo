@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                 }
                 "voiceShortcut" -> {
                     paramsKeyEditText.setText("intent")
-                    paramsValueEditText.setText("favorite")
+                    paramsValueEditText.setText("personalRadio")
                 }
             }
         }
