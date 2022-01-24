@@ -1,5 +1,6 @@
 package com.tencent.qqmusic.api.demo
 
+import android.app.AlertDialog
 import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -1199,18 +1200,18 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         // 告白气球：003OUlho2HcRHC
         // 一路向北: 001xd0HI0X9GNq
         // 后来的风：001uTC4A3i9hH5
-        params.putStringArrayList(
-            "midList",
-            //arrayListOf("003OUlho2HcRHC", "003tbRjy4V1wRt", "0049yRyN2u69wj", "003h3CYS3UxDB4")
-            arrayListOf("001uTC4A3i9hH5")
-        )
-        qqmusicApi?.executeAsync("playSongMid", params, object : IQQMusicApiCallback.Stub() {
-            override fun onReturn(result: Bundle) {
-                val json = result.getInt(Keys.API_RETURN_KEY_CODE)
-                val error = result.getString(Keys.API_RETURN_KEY_ERROR)
-                Log.d(TAG, "got play list: $json, error=$error")
-            }
-        })
+//        params.putStringArrayList(
+//            "midList",
+//            //arrayListOf("003OUlho2HcRHC", "003tbRjy4V1wRt", "0049yRyN2u69wj", "003h3CYS3UxDB4")
+//            arrayListOf("001uTC4A3i9hH5")
+//        )
+//        qqmusicApi?.executeAsync("playSongMid", params, object : IQQMusicApiCallback.Stub() {
+//            override fun onReturn(result: Bundle) {
+//                val json = result.getInt(Keys.API_RETURN_KEY_CODE)
+//                val error = result.getString(Keys.API_RETURN_KEY_ERROR)
+//                Log.d(TAG, "got play list: $json, error=$error")
+//            }
+//        })
 
         //val bundle = Bundle()
         //bundle.putInt(Keys.API_PARAM_KEY_SDK_VERSION, CommonCmd.SDK_VERSION)
@@ -1219,6 +1220,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         //Log.d(TAG, "sayHi ret:" + result?.getInt(Keys.API_RETURN_KEY_CODE))
 
         //qqmusicApi?.execute()
+        CommonCmd.startQQMusicProcess(this, this.packageName)
     }
 
     fun doSearch(v: View?) {
