@@ -6,6 +6,7 @@ import android.os.IBinder
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.tencent.qqmusic.api.demo.*
 import com.tencent.qqmusic.api.demo.R
 
@@ -52,10 +53,12 @@ class PcmExampleActivityNew : AppCompatActivity() {
 
         findViewById<Button>(R.id.bt_start_pcm_mode).setOnClickListener {
             playService?.startPcmMode()
+            Toast.makeText(this, "进入PCM模式", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.bt_stop_pcm_mode).setOnClickListener {
             playService?.stopPcmMode()
+            Toast.makeText(this, "退出PCM模式", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.bt_play).setOnClickListener {
