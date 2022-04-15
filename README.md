@@ -32,8 +32,8 @@ val privateKey = RSAUtils.getPrivateKey(keyPair)
 
 ```
 title	OpenID申请-XXXXX公司
-send	shuozhao@tencent.com
-cc	tangotang@tencent.com
+send	camzhu@tencent.com
+cc	shuozhao@tencent.com
 
 正文信息：
 1、组织名称	XX公司
