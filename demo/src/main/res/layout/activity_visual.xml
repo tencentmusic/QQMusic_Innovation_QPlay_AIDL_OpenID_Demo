@@ -145,18 +145,11 @@
                 android:layout_height="wrap_content"
                 android:onClick="onClickSearch"
                 android:text="搜索" />
-
-
-            <Button
-                android:id="@+id/btnSchemeAction2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="doSearch"
-                android:text="自定义跳转2" />
         </LinearLayout>
 
+
         <LinearLayout
-            android:id="@+id/ll_other_button"
+            android:id="@+id/ll_test_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/ll_opi_button"
@@ -168,20 +161,6 @@
                 android:layout_height="wrap_content"
                 android:onClick="onClickLyric"
                 android:text="歌词" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_test_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/ll_opi_button"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="testGetLyric"
-                android:text="测试获取歌词" />
 
             <Button
                 android:layout_width="wrap_content"
