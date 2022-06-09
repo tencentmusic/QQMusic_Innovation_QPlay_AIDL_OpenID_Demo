@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">QQMusicApiDemo</string>
+    <string name="app_name">ApiDemoQQMusic</string>
     <string name="title_activity_qrcode">QRCodeActivity</string>
     <string name="login_hint">使用QQ音乐手机端完成登录获取Openid OpenToken的例子\n
         由于同一scheme在CallbackActivity和LoginExampleActivity都需要使用，避免混乱，AndroidManifest.xml中

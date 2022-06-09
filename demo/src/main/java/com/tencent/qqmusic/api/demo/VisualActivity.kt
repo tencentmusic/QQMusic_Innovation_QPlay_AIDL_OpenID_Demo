@@ -220,7 +220,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             if (song.id == backId.toString()) {
                 onBackClick(view)
             } else {
-                val songlist = curSonglist.subList(1, curSonglist.size - 1)
+                val songlist = curSonglist.subList(1, curSonglist.size)
                 playSonglist(songlist, song)
             }
         }
@@ -797,34 +797,39 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             if (song.id == songList[i].id)
                 curIndex = i
         }
-        if (curIndex > 0) {
-            val subList = idList.subList(0, curIndex).toList()
-            try {
-                idList.removeAll(subList)
-                idList.addAll(subList)
-            } catch (e: Exception) {
-                printToTextView(e)
-            }
-
-        }
-
         val params = Bundle()
         params.putStringArrayList("songIdList", idList)
         printToTextView("播放歌曲列表... ${song.title},${songList.size}")
+        if (curIndex > 0) {
+            params.putInt("index", curIndex)
+            qqmusicApi?.executeAsync("playSongIdAtIndex", params, object : IQQMusicApiCallback.Stub() {
+                override fun onReturn(result: Bundle) {
+                    // 回调的结果
+                    commonOpen(result)
+                    val code = result.getInt(Keys.API_RETURN_KEY_CODE)
 
-        qqmusicApi?.executeAsync("playSongId", params, object : IQQMusicApiCallback.Stub() {
-            override fun onReturn(result: Bundle) {
-                // 回调的结果
-                commonOpen(result)
-                val code = result.getInt(Keys.API_RETURN_KEY_CODE)
-
-                if (code == ErrorCodes.ERROR_OK) {
-                    runOnUiThread { syncCurrentPlayInfo() }
-                } else {
-                    printToTextView("播放歌曲列表失败（$code)")
+                    if (code == ErrorCodes.ERROR_OK) {
+                        runOnUiThread { syncCurrentPlayInfo() }
+                    } else {
+                        printToTextView("播放歌曲列表失败（$code)")
+                    }
                 }
-            }
-        })
+            })
+        } else {
+            qqmusicApi?.executeAsync("playSongId", params, object : IQQMusicApiCallback.Stub() {
+                override fun onReturn(result: Bundle) {
+                    // 回调的结果
+                    commonOpen(result)
+                    val code = result.getInt(Keys.API_RETURN_KEY_CODE)
+
+                    if (code == ErrorCodes.ERROR_OK) {
+                        runOnUiThread { syncCurrentPlayInfo() }
+                    } else {
+                        printToTextView("播放歌曲列表失败（$code)")
+                    }
+                }
+            })
+        }
     }
 
     //通过SongId播放歌曲列表
@@ -1114,6 +1119,135 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         }
 
         return ""
+    }
+
+    fun onClickSearch(view: View) {
+        val builder = AlertDialog.Builder(this)
+        builder.setItems(R.array.sear_type
+        ) { _, which ->
+            val edit = EditText(view.context)
+            AlertDialog.Builder(this)
+                .setView(edit)
+                .setPositiveButton("确定") { _, _ ->
+                    var text = edit.text?.toString()
+                    if (text.isNullOrEmpty()) {
+                        text = null
+                    }
+                    when (which) {
+                        0 -> {
+                            search(text ?: "七里香", Data.SearchType.SEARCH_TYPE_ALBUM)
+                        }
+                        1 -> {
+                            search(text ?: "轻音乐", Data.SearchType.SEARCH_TYPE_FOLDER)
+                        }
+                        2 -> {
+                            search(text ?: "从出生那年就飘着", Data.SearchType.SEARCH_TYPE_LYRIC)
+                        }
+                        3 -> {
+                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_MIX)
+                        }
+                        4 -> {
+                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_MV)
+                        }
+                        5 -> {
+                            search(text ?: "七里香", Data.SearchType.SEARCH_TYPE_SIMILAR_SONG)
+                        }
+                        6 -> {
+                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_SINGER)
+                        }
+                        7 -> {
+                            search(text ?: "七里香", Data.SearchType.SEARCH_TYPE_SONG)
+                        }
+                        8 -> {
+                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_USER)
+                        }
+                    }
+                }
+                .show()
+        }
+        builder.create().show()
+    }
+
+    private fun search(keyword: String, type: Int) {
+        val params = Bundle()
+        params.putInt("searchType", type)
+        params.putString("keyword", keyword)
+        qqmusicApi?.executeAsync("search", params, object : IQQMusicApiCallback.Stub() {
+            override fun onReturn(result: Bundle) {
+                // 回调的结果
+                commonOpen(result)
+                val code = result.getInt(Keys.API_RETURN_KEY_CODE)
+                if (code == ErrorCodes.ERROR_OK) {
+                    val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
+                    val array = JsonParser().parse(dataJson).asJsonArray
+                    when (type) {
+                        Data.SearchType.SEARCH_TYPE_ALBUM, Data.SearchType.SEARCH_TYPE_FOLDER -> {
+                            curFolderlist.clear()
+                            backFolder?.let { curFolderlist.add(it) }
+                            for (elem in array) {
+                                val folder = gson.fromJson(elem, Data.FolderInfo::class.java)
+                                curFolderlist.add(folder)
+                            }
+                            printToTextView("获取列表成功（${curFolderlist.size})")
+                            runOnUiThread {
+                                songListView.visibility = GONE
+                                folderListView.visibility = VISIBLE
+                                folderAdapter?.notifyDataSetChanged()
+                            }
+                        }
+                        Data.SearchType.SEARCH_TYPE_LYRIC, Data.SearchType.SEARCH_TYPE_MIX, Data.SearchType.SEARCH_TYPE_MV, Data.SearchType.SEARCH_TYPE_SINGER, Data.SearchType.SEARCH_TYPE_USER -> {
+                            runOnUiThread {
+                                AlertDialog.Builder(this@VisualActivity)
+                                    .setMessage(dataJson)
+                                    .show()
+                            }
+                        }
+                        Data.SearchType.SEARCH_TYPE_SIMILAR_SONG, Data.SearchType.SEARCH_TYPE_SONG -> {
+                            curSonglist.clear()
+                            backSong?.let { curSonglist.add(it) }
+                            for (elem in array) {
+                                val song = gson.fromJson(elem, Data.Song::class.java)
+                                curSonglist.add(song)
+                            }
+                            printToTextView("获取歌曲列表成功（${curSonglist.size})")
+                            runOnUiThread {
+                                songListView.visibility = VISIBLE
+                                folderListView.visibility = GONE
+                                songAdapter?.notifyDataSetChanged()
+                            }
+                        }
+                    }
+                } else {
+                    printToTextView("搜索失败（$code)")
+                }
+            }
+        })
+    }
+
+    fun onClickLyric(view: View) {
+        curPlaySong?.run {
+            val params = Bundle()
+            params.putString("songId", id)
+            qqmusicApi?.executeAsync("getLyricWithId", params, object : IQQMusicApiCallback.Stub() {
+                override fun onReturn(result: Bundle) {
+                    Log.d(TAG, "getLyric onReturn")
+                    commonOpen(result)
+                    val code = result.getInt(Keys.API_RETURN_KEY_CODE)
+                    if (code == ErrorCodes.ERROR_OK) {
+                        val lyric = result.getString(Keys.API_RETURN_KEY_DATA)
+                        runOnUiThread {
+                            AlertDialog.Builder(this@VisualActivity)
+                                .setMessage(lyric)
+                                .show()
+                        }
+                        printToTextView("获取歌词成功")
+                    } else {
+                        printToTextView("获取歌词失败（$code)")
+                    }
+                }
+            })
+        }
+        printToTextView("没有获取到当前播放歌曲")
     }
 
     fun onClickOpiSearch(view: View) {

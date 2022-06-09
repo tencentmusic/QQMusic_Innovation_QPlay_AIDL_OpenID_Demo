@@ -4,4 +4,15 @@
         <item>TV</item>
         <item>Car</item>
     </string-array>
+    <string-array name="sear_type">
+        <item>专辑</item>
+        <item>歌单</item>
+        <item>歌词</item>
+        <item>混合搜索</item>
+        <item>mv</item>
+        <item>歌手歌曲</item>
+        <item>歌手</item>
+        <item>歌曲</item>
+        <item>用户</item>
+    </string-array>
 </resources>
