@@ -1246,6 +1246,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     }
                 }
             })
+            return
         }
         printToTextView("没有获取到当前播放歌曲")
     }
@@ -1356,26 +1357,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         CommonCmd.startQQMusicProcess(this, this.packageName)
     }
 
-    fun doSearch(v: View?) {
-        val params = Bundle()
-        //params.putStringArrayList("midList", arrayListOf("449198", "003LtC4H15LRSE", "002D1xKJ0yN0UM", "201233523|2", "685668|2"))
-        //params.putStringArrayList("midList", arrayListOf("410|0"))
-        // 告白气球：003OUlho2HcRHC
-        // 一路向北: 001xd0HI0X9GNq
-        params.putString("keyword", "浪漫音乐")
-        params.putInt("searchType", 0)
-        params.putBoolean("firstPage", true)
-        qqmusicApi?.executeAsync("search", params, object : IQQMusicApiCallback.Stub() {
-            override fun onReturn(result: Bundle) {
-                val error = result.getString(Keys.API_RETURN_KEY_ERROR)
-                val data = result.getString(Keys.API_RETURN_KEY_DATA)
-                Log.d(TAG, "search result: $data, error=$error")
-            }
-        })
-
-        //qqmusicApi?.execute()
-    }
-
     fun testPlayList(v: View) {
         val params = Bundle()
         params.putInt("page", 0)
@@ -1403,24 +1384,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val json = result.getString(Keys.API_RETURN_KEY_DATA)
                 val more = result.getString(Keys.API_RETURN_KEY_HAS_MORE)
                 Log.d(TAG, "got folder list: $json, more=$more")
-            }
-        })
-    }
-
-    fun testGetLyric(v: View) {
-        if (curPlaySong == null) {
-            Toast.makeText(this, "没有歌曲", Toast.LENGTH_SHORT).show()
-            //return
-        }
-        val params = Bundle()
-        val songId = curPlaySong?.id?.split("|")?.get(0)?.toLong() ?: 0L
-        params.putString("songId", "304225136|2")
-        //params.putString("songId", curPlaySong?.id ?: "")
-        qqmusicApi?.executeAsync("getLyricWithId", params, object : IQQMusicApiCallback.Stub() {
-            override fun onReturn(result: Bundle) {
-                val json = result.getString(Keys.API_RETURN_KEY_DATA)
-                val error = result.getString(Keys.API_RETURN_KEY_ERROR)
-                Log.d(TAG, "got Lyric: $json, error=$error")
             }
         })
     }
