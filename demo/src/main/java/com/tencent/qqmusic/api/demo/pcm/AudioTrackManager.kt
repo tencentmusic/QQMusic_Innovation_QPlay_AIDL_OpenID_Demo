@@ -9,7 +9,7 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.util.Log
-import com.smartdevicelink.util.BitConverter
+import com.tencent.qqmusic.api.demo.util.BitConverter
 import java.io.DataInputStream
 import java.io.File
 import java.io.FileInputStream
