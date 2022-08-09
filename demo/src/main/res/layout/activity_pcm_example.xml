@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tv_information"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        />
+
+    <Button
+        android:id="@+id/bt_bind_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="bind service" />
+
+    <Button
+        android:id="@+id/bt_start_pcm_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start pcm mode" />
+
+    <Button
+        android:id="@+id/bt_stop_pcm_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop pcm mode" />
+
+    <Button
+        android:id="@+id/bt_play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Resume/Pause" />
+
+    <Button
+        android:id="@+id/bt_next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Play next" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:text="@string/pcm_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

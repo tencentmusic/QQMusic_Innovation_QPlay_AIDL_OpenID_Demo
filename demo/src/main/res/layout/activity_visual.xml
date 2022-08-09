@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".VisualActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -76,7 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="授权"/>
+                android:text="授权" />
 
             <Button
                 android:id="@+id/btnPlayPre"
@@ -137,17 +137,49 @@
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onClickSchemeAction"
+                android:onClick="playSongMid"
                 android:text="自定义跳转" />
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClickSearch"
+                android:text="搜索" />
+        </LinearLayout>
 
 
+        <LinearLayout
+            android:id="@+id/ll_test_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_opi_button"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnLyric"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClickLyric"
+                android:text="歌词" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="testGetFolderList"
+                android:text="快退1s" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="testPlayList"
+                android:text="快进1s" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/txtResult"
             android:layout_width="fill_parent"
             android:layout_height="35dp"
-            android:layout_below="@+id/ll_opi_button"
+            android:layout_below="@+id/ll_test_1"
             android:ems="10"
             android:text="Debug informations" />
 

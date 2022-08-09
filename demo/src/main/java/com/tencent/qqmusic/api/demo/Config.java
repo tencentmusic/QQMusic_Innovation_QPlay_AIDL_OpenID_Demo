@@ -21,6 +21,6 @@ public class Config {
      * {@link CommonCmd#AIDL_PLATFORM_TYPE_CAR}
      * {@link CommonCmd#AIDL_PLATFORM_TYPE_PAD}
      */
-    public static final String BIND_PLATFORM = "";
+    public static String BIND_PLATFORM = "";
 
 }
