@@ -27,39 +27,19 @@ val privateKey = RSAUtils.getPrivateKey(keyPair)
 ```
 生成的RSA公钥需要发给QQ音乐，而私钥需要自行妥善保管
 
-### 申请AppId
-按照以下格式发邮件：
-
-```
-title	OpenID申请-XXXXX公司
-send	camzhu@tencent.com
-cc	shuozhao@tencent.com
-
-正文信息：
-1、组织名称	XX公司
-2、应用名称	
-3、联系人名	（接口人即可）
-4、联系电话	（接口人即可）
-5、联系邮件	（接受账号开通信息）
-6、应用包名	（如果有多个包名就用;分割）
-7、应用图标	（ 文件:1K-1M）
-8、业务公钥	申请人自己生成的RSA公钥，参见《生成RSA公私钥》小节
-```
 
 ### 运行Demo
 请在编译之前，务必修改业务参数，在`Config.java`中修改如下常量：
 
 ```java
 public class Config {
-    public static final String OPENID_APPID = "";
-    public static final String OPENID_APP_PRIVATE_KEY = "";
-    public static final String BIND_PLATFORM = "";
+    public static final String OPENID_APPID = ""; // 请使用开发者平台申请得到的appid(200000***)
+    public static final String OPENID_APP_PRIVATE_KEY = "";// 请使用合作方自己生成的RSA私钥,别忘了把对应的RSA公钥提供给QQ音乐配置
+    public static final String BIND_PLATFORM = ""; // 如果需要连接手机端QQ音乐App 请参考sdk中CommonCmd.AIDL_PLATFORM_TYPE_PHONE变量
 }
 
 ```
 这三个值都要配置，**不可以**留空
-
-请一定注意：**上述三个数值（除BIND_PLATFORM）一定来自OpenID业务，不要与OpenAPI业务混淆**。
 
 ### 如何运行
 
