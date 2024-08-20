@@ -59,16 +59,22 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val btnOpiMvTag by lazy { findViewById<Button>(R.id.btnOpiMvTag) }
     private val folderListView by lazy { findViewById<ListView>(R.id.listview_folder) }
     private val songListView by lazy { findViewById<ListView>(R.id.listview_song) }
+    private val albumListView by lazy { findViewById<ListView>(R.id.listview_album) }
+
     private val btnPlayFromChorus by lazy { findViewById<Button>(R.id.btnPlayFromChorus) }
 
     private var qqmusicApi: IQQMusicApi? = null
 
     private var folderAdapter: FolderListAdapter? = null
+    private var albumAdapter: AlbumListAdapter? = null
     private var songAdapter: SongListAdapter? = null
     private val pathStack: Stack<Data.FolderInfo> = Stack()
 
     private val curFolderlist: ArrayList<Data.FolderInfo> = ArrayList()//FolderListView数据
     private var curSonglist: ArrayList<Data.Song> = ArrayList()//SongListView数据
+    private val curAlbumlist: ArrayList<Data.Album> = ArrayList()//AlbumListView数据
+
+    private var curAlbum: Data.Album? = null
     private var curFolder: Data.FolderInfo? = null
     private var curPlayState: Int = 0
     private var curPlaySong: Data.Song? = null
@@ -87,6 +93,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val backId: Int = -10000
     private var backFolder: Data.FolderInfo? = null
     private var backSong: Data.Song? = null
+    private var backAlbum: Data.Album? = null
     private var lastSearchTypeText: Pair<Int, String>? = null
     private var currentSearchPage: Int = 0
 
@@ -125,6 +132,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         initSongListView()
 
+        initAlbumListView()
+
         backFolder = Data.FolderInfo()
         backFolder?.type = backId
         backFolder?.mainTitle = ".. 返回上一级"
@@ -132,6 +141,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         backSong = Data.Song()
         backSong?.id = backId.toString()
         backSong?.title = ".. 返回上一级"
+
+        backAlbum = Data.Album()
+        backAlbum?.id = backId.toLong()
+        backAlbum?.title = ".. 返回上一级"
 
         //register activeBroadcastReceiver
         val filter = IntentFilter()
@@ -228,6 +241,26 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 val songlist = curSonglist.subList(1, curSonglist.size)
                 playSonglist(songlist, song)
             }
+        }
+    }
+
+    private fun initAlbumListView() {
+        albumAdapter = AlbumListAdapter(this, curAlbumlist)
+        albumListView.adapter = albumAdapter
+        //点击处理
+        albumListView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
+            if (position >= curAlbumlist.size) {
+                return@OnItemClickListener
+            }
+            val album = curAlbumlist[position]
+
+            if (album.id == backId.toLong()) {
+                onBackClick(view)
+                return@OnItemClickListener
+            }
+
+            curAlbum = album
+            getNormalSongList(album.mid, Data.FolderType.ALBUM_FOLDER_SONG_LIST, 0)
         }
     }
 
@@ -719,28 +752,29 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             }
             getUserSongList(folder, page)
         } else {
-            getNormalSongList(folder, page)
+            getNormalSongList(folder.id, folder.type, page)
         }
 
     }
 
-    //获取普通歌曲列表
-    private fun getNormalSongList(folder: Data.FolderInfo, page: Int) {
+    //歌单id/专辑mid，获取歌曲列表
+    private fun getNormalSongList(folderId:String, folderType: Int, page: Int) {
         val params = Bundle()
-        params.putString("folderId", folder.id ?: "")
-        params.putInt("folderType", folder.type)
+        params.putString("folderId", folderId)
+        params.putInt("folderType", folderType)
         params.putInt("page", page)
-        printToTextView("获取歌曲列表... ${folder.id},${folder.type}")
+        printToTextView("获取歌曲列表... ${folderId},${folderType}")
 
         runOnUiThread {
             curFolderlist.clear()
             folderAdapter?.notifyDataSetChanged()
             songListView.visibility = VISIBLE
             folderListView.visibility = GONE
+            albumListView.visibility = GONE
         }
         Log.d(
             TAG,
-            "[getNormalSongList] executeAsync getSongList folderType:${folder.type} folderId:${folder.id} page:$page"
+            "[getNormalSongList] executeAsync getSongList folderType:${folderType} folderId:${folderId} page:$page"
         )
         qqmusicApi?.executeAsync("getSongList", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
@@ -760,7 +794,11 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     printToTextView("获取歌曲列表成功（${curSonglist.size})")
                     runOnUiThread { songAdapter?.notifyDataSetChanged() }
                 } else {
+                    if (curSonglist.isEmpty()){
+                        backSong?.let { curSonglist.add(it) }
+                    }
                     printToTextView("获取歌曲列表失败（$code)")
+
                 }
 
             }
@@ -1178,15 +1216,15 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             val edit = EditText(view.context)
             val searchTypeDefaultText = when (which) {
                 0 -> Pair(Data.SearchType.SEARCH_TYPE_MIX_NEW, "开心")
-                1 -> Pair(Data.SearchType.SEARCH_TYPE_SONG, "愿与愁")
-                2 -> Pair(Data.SearchType.SEARCH_TYPE_FOLDER, "百万收藏")
-                3 -> Pair(Data.SearchType.SEARCH_TYPE_MV, "演唱会")
+                1 -> Pair(Data.SearchType.SEARCH_TYPE_MIX, "车载")
+                2 -> Pair(Data.SearchType.SEARCH_TYPE_SONG, "愿与愁")
+                3 -> Pair(Data.SearchType.SEARCH_TYPE_FOLDER, "百万收藏")
                 4 -> Pair(Data.SearchType.SEARCH_TYPE_ALBUM, "范特西")
-                5 -> Pair(Data.SearchType.SEARCH_TYPE_SINGER, "周杰伦")
-                6 -> Pair(Data.SearchType.SEARCH_TYPE_LYRIC, "从出生那年就飘着")
-                7 -> Pair(Data.SearchType.SEARCH_TYPE_USER, "QQ音乐")
-                8 -> Pair(Data.SearchType.SEARCH_TYPE_SIMILAR_SONG, "七里香")
-                9 -> Pair(Data.SearchType.SEARCH_TYPE_MIX, "车载")
+                5 -> Pair(Data.SearchType.SEARCH_TYPE_SIMILAR_SONG, "214103695")
+                6 -> Pair(Data.SearchType.SEARCH_TYPE_MV, "演唱会")
+                7 -> Pair(Data.SearchType.SEARCH_TYPE_SINGER, "周杰伦")
+                8 -> Pair(Data.SearchType.SEARCH_TYPE_LYRIC, "从出生那年就飘着")
+                9 -> Pair(Data.SearchType.SEARCH_TYPE_USER, "QQ音乐")
                 else-> {
                     Toast.makeText(this,"未定义的SearchType",Toast.LENGTH_SHORT).show()
                     return@setItems
@@ -1229,16 +1267,33 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
                     when (type) {
-                        Data.SearchType.SEARCH_TYPE_ALBUM, Data.SearchType.SEARCH_TYPE_FOLDER -> {
+                        Data.SearchType.SEARCH_TYPE_ALBUM -> {
+                            curAlbumlist.clear()
+                            backAlbum?.let { curAlbumlist.add(it) }
+                            for (elem in array) {
+                                val album = gson.fromJson(elem, Data.Album::class.java)
+                                curAlbumlist.add(album)
+                            }
+                            printToTextView("获取列表成功（count:${curFolderlist.size},page:${currentSearchPage})")
+                            runOnUiThread {
+                                songListView.visibility = GONE
+                                folderListView.visibility = GONE
+                                albumListView.visibility = VISIBLE
+                                albumAdapter?.notifyDataSetChanged()
+                            }
+                        }
+                        Data.SearchType.SEARCH_TYPE_FOLDER -> {
                             curFolderlist.clear()
                             backFolder?.let { curFolderlist.add(it) }
                             for (elem in array) {
                                 val folder = gson.fromJson(elem, Data.FolderInfo::class.java)
+                                folder.type = Data.FolderType.PLAYLIST_FOLDER_SONG_LIST
                                 curFolderlist.add(folder)
                             }
                             printToTextView("获取列表成功（count:${curFolderlist.size},page:${currentSearchPage})")
                             runOnUiThread {
                                 songListView.visibility = GONE
+                                albumListView.visibility = GONE
                                 folderListView.visibility = VISIBLE
                                 folderAdapter?.notifyDataSetChanged()
                             }
@@ -1252,8 +1307,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                             }
                             printToTextView("搜索成功（count:${curSonglist.size},page:${currentSearchPage})")
                             runOnUiThread {
-                                songListView.visibility = VISIBLE
                                 folderListView.visibility = GONE
+                                albumListView.visibility = GONE
+                                songListView.visibility = VISIBLE
                                 songAdapter?.notifyDataSetChanged()
                             }
                         }
@@ -1723,4 +1779,48 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     }
 
+    inner class AlbumListAdapter(context: Context, private var list: ArrayList<Data.Album>) :
+        BaseAdapter() {
+        private var mInflater: LayoutInflater? = null
+
+        init {
+            mInflater = LayoutInflater.from(context)
+        }
+
+        override fun getItem(position: Int): Any {
+            return this.list[position]
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getCount(): Int {
+            return this.list.size
+        }
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            val view: View?
+            val holder: ViewHolder?
+            if (convertView == null) {
+
+                view = mInflater?.inflate(R.layout.folder_list_view_item, null)
+                holder = ViewHolder(view, false)
+                view?.tag = holder
+
+            } else {
+                view = convertView
+                holder = view.tag as ViewHolder
+            }
+            if (position >= count) {
+                return view as View
+            }
+            val album = this.list[position]
+            if (album != null) {
+                holder.txtTitle?.text = album.title
+
+            }
+            return view as View
+        }
+    }
 }
