@@ -152,7 +152,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                 //tv端需要添加from key
                 //putLong("from", 1)
             }
-            execute(actionEditText.text.toString(), params, false)
+            Thread {
+                execute(actionEditText.text.toString(), null, false)
+            }.start()
         }
 
         executeAsyncButton.setOnClickListener {
@@ -249,7 +251,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             } else if (code == ErrorCodes.ERROR_NEED_USER_AUTHENTICATION) {
                 Log.d(TAG, "commonOpen: CommonCmd.loginQQMusic")
                 //qqmusic://qq.com/other/aidl?p={"cmd":"login","callbackurl": "qqmusicapidemo://xxx"}
-                CommonCmd.loginQQMusic(this@MainActivity, "qqmusicapidemo://xxx")
+                CommonCmd.loginQQMusic(this@MainActivity, packageName,Config.OPENID_APPID,"qqmusicapidemo://xxx")
             }
         }
     }

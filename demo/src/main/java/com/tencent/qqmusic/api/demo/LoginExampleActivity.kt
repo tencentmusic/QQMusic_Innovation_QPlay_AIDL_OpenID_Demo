@@ -46,9 +46,24 @@ class LoginExampleActivity : AppCompatActivity() {
                     Log.d(TAG, "isBindQQMusic")
                     qqMusicApi = qPlayBindHelper.getQQMusicApi()!!
                     qqMusicApiWrapper = QQMusicApiWrapper(qqMusicApi)
+                    val time = System.currentTimeMillis()
+                    val nonce = time.toString()
+                    val encryptString = OpenIDHelper.getEncryptString(nonce)
+                    CommonCmd.loginQQMusic(this, packageName, Config.OPENID_APPID, encryptString, true, URI_LOGIN)
+                }
+            }
+        }
 
-                    CommonCmd.loginQQMusic(this, URI_LOGIN)
-
+        findViewById<Button>(R.id.bt_bind_service_2).setOnClickListener {
+            qPlayBindHelper.ensureQQMusicBindByStartProcess {
+                if (it && qPlayBindHelper.isBindQQMusic()) {
+                    Log.d(TAG, "isBindQQMusic")
+                    qqMusicApi = qPlayBindHelper.getQQMusicApi()!!
+                    qqMusicApiWrapper = QQMusicApiWrapper(qqMusicApi)
+                    val time = System.currentTimeMillis()
+                    val nonce = time.toString()
+                    val encryptString = OpenIDHelper.getEncryptString(nonce)
+                    CommonCmd.loginQQMusic(this, packageName, Config.OPENID_APPID, "", false, URI_LOGIN)
                 }
             }
         }

@@ -15,6 +15,12 @@
         android:id="@+id/bt_bind_service"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="login" />
+        android:text="登录后授权" />
+
+    <Button
+        android:id="@+id/bt_bind_service_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="仅登录" />
 
 </LinearLayout>

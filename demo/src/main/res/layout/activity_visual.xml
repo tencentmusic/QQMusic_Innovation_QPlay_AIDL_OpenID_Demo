@@ -173,6 +173,12 @@
                 android:layout_height="wrap_content"
                 android:onClick="testPlayList"
                 android:text="快进1s" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="fetchDaily30"
+                android:text="每日30首" />
         </LinearLayout>
 
         <TextView
