@@ -59,6 +59,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val btnOpiMvTag by lazy { findViewById<Button>(R.id.btnOpiMvTag) }
     private val folderListView by lazy { findViewById<ListView>(R.id.listview_folder) }
     private val songListView by lazy { findViewById<ListView>(R.id.listview_song) }
+    private val btnPlayFromChorus by lazy { findViewById<Button>(R.id.btnPlayFromChorus) }
 
     private var qqmusicApi: IQQMusicApi? = null
 
@@ -86,10 +87,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     private val backId: Int = -10000
     private var backFolder: Data.FolderInfo? = null
     private var backSong: Data.Song? = null
+    private var lastSearchTypeText: Pair<Int, String>? = null
+    private var currentSearchPage: Int = 0
 
     //private  val MSG_BIND_LOOPER: Int = 11
 
     private val handler: Handler by lazy { Handler() }
+
+    private val vipIcon = mapOf(0 to "", 1 to " [vip]", 2 to " [svip]")
 
     private fun tryBindQQMusicApiServiceRecursively() {
         val bindRet = bindQQMusicApiService(BIND_PLATFORM)
@@ -916,7 +921,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             return
         Log.d(TAG, "curPlaySong:${curPlaySong?.title}")
 
-        txtSongInfos.text = curPlaySong?.title
+        txtSongInfos.text = curPlaySong?.title + vipIcon[curPlaySong?.vipState]
         txtAlbum.text = curPlaySong?.album?.title + " - " + curPlaySong?.singer?.title
         if (!curPlaySong?.album?.coverUri.isNullOrEmpty()) {
             setSongUrlImage(curPlaySong?.album?.coverUri ?: "")
@@ -1063,12 +1068,17 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     private fun setSongUrlImage(url: String) {
         Thread(Runnable {
-            val bmp = getURLimage(url)
-            if (bmp != null) {
-                val msg = Message()
-                msg.what = 1
-                msg.obj = bmp
-                handle.sendMessage(msg)
+            try {
+                val bmp = getURLimage(url)
+                if (bmp != null) {
+                    val msg = Message.obtain()
+                    msg.what = 1
+                    msg.obj = bmp
+                    handle.sendMessage(msg)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // 这里可以处理异常，例如设置一个默认图片或显示错误信息
             }
         }).start()
     }
@@ -1084,11 +1094,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             conn.useCaches = false
             conn.connect()
             bmp = BitmapFactory.decodeStream(conn.inputStream)
-            conn.inputStream.close()
+            conn.disconnect() // 确保连接被关闭
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
         return bmp
     }
 
@@ -1142,47 +1151,61 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         return ""
     }
 
+    fun onClickPlayFromChorus(view: View) {
+        val bool = btnPlayFromChorus.text=="开启高潮模式"
+        val params = Bundle()
+        params.putBoolean("fromChorus", bool)
+        qqmusicApi?.executeAsync("playFromChorus", params, object : IQQMusicApiCallback.Stub() {
+            override fun onReturn(result: Bundle) {
+                // 回调的结果
+                commonOpen(result)
+                val code = result.getInt(Keys.API_RETURN_KEY_CODE)
+                if (code == ErrorCodes.ERROR_OK) {
+                    printToTextView("设置高潮模式成功")
+                    btnPlayFromChorus.text = if (bool) "关闭高潮模式" else "开启高潮模式"
+                }
+                else {
+                    printToTextView("设置失败:（$code)")
+                }
+            }
+        })
+    }
+
     fun onClickSearch(view: View) {
         val builder = AlertDialog.Builder(this)
         builder.setItems(R.array.sear_type
         ) { _, which ->
             val edit = EditText(view.context)
+            val searchTypeDefaultText = when (which) {
+                0 -> Pair(Data.SearchType.SEARCH_TYPE_MIX_NEW, "开心")
+                1 -> Pair(Data.SearchType.SEARCH_TYPE_SONG, "愿与愁")
+                2 -> Pair(Data.SearchType.SEARCH_TYPE_FOLDER, "百万收藏")
+                3 -> Pair(Data.SearchType.SEARCH_TYPE_MV, "演唱会")
+                4 -> Pair(Data.SearchType.SEARCH_TYPE_ALBUM, "范特西")
+                5 -> Pair(Data.SearchType.SEARCH_TYPE_SINGER, "周杰伦")
+                6 -> Pair(Data.SearchType.SEARCH_TYPE_LYRIC, "从出生那年就飘着")
+                7 -> Pair(Data.SearchType.SEARCH_TYPE_USER, "QQ音乐")
+                8 -> Pair(Data.SearchType.SEARCH_TYPE_SIMILAR_SONG, "七里香")
+                9 -> Pair(Data.SearchType.SEARCH_TYPE_MIX, "车载")
+                else-> {
+                    Toast.makeText(this,"未定义的SearchType",Toast.LENGTH_SHORT).show()
+                    return@setItems
+                }
+            }
+            var editText = searchTypeDefaultText.second
+            if (lastSearchTypeText?.first == searchTypeDefaultText.first){
+                // 搜索类型和上次是一样的则填上次搜索的值
+                editText = lastSearchTypeText?.second?:searchTypeDefaultText.second
+            }
+            edit.setText(editText)
             AlertDialog.Builder(this)
                 .setView(edit)
                 .setPositiveButton("确定") { _, _ ->
                     var text = edit.text?.toString()
                     if (text.isNullOrEmpty()) {
-                        text = null
+                        text = searchTypeDefaultText.second
                     }
-                    when (which) {
-                        0 -> {
-                            search(text ?: "七里香", Data.SearchType.SEARCH_TYPE_ALBUM)
-                        }
-                        1 -> {
-                            search(text ?: "轻音乐", Data.SearchType.SEARCH_TYPE_FOLDER)
-                        }
-                        2 -> {
-                            search(text ?: "从出生那年就飘着", Data.SearchType.SEARCH_TYPE_LYRIC)
-                        }
-                        3 -> {
-                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_MIX)
-                        }
-                        4 -> {
-                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_MV)
-                        }
-                        5 -> {
-                            search(text ?: "七里香", Data.SearchType.SEARCH_TYPE_SIMILAR_SONG)
-                        }
-                        6 -> {
-                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_SINGER)
-                        }
-                        7 -> {
-                            search(text ?: "七里香", Data.SearchType.SEARCH_TYPE_SONG)
-                        }
-                        8 -> {
-                            search(text ?: "周杰伦", Data.SearchType.SEARCH_TYPE_USER)
-                        }
-                    }
+                    search(text, searchTypeDefaultText.first)
                 }
                 .show()
         }
@@ -1190,8 +1213,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun search(keyword: String, type: Int) {
+        val firstPage = (lastSearchTypeText?.first==type && lastSearchTypeText?.second==keyword).not()
+        lastSearchTypeText = Pair(type, keyword)
+        currentSearchPage = if (firstPage) 0 else currentSearchPage+1
         val params = Bundle()
         params.putInt("searchType", type)
+        params.putBoolean("firstPage", firstPage)
         params.putString("keyword", keyword)
         qqmusicApi?.executeAsync("search", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
@@ -1209,18 +1236,11 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                                 val folder = gson.fromJson(elem, Data.FolderInfo::class.java)
                                 curFolderlist.add(folder)
                             }
-                            printToTextView("获取列表成功（${curFolderlist.size})")
+                            printToTextView("获取列表成功（count:${curFolderlist.size},page:${currentSearchPage})")
                             runOnUiThread {
                                 songListView.visibility = GONE
                                 folderListView.visibility = VISIBLE
                                 folderAdapter?.notifyDataSetChanged()
-                            }
-                        }
-                        Data.SearchType.SEARCH_TYPE_LYRIC, Data.SearchType.SEARCH_TYPE_MIX, Data.SearchType.SEARCH_TYPE_MV, Data.SearchType.SEARCH_TYPE_SINGER, Data.SearchType.SEARCH_TYPE_USER -> {
-                            runOnUiThread {
-                                AlertDialog.Builder(this@VisualActivity)
-                                    .setMessage(dataJson)
-                                    .show()
                             }
                         }
                         Data.SearchType.SEARCH_TYPE_SIMILAR_SONG, Data.SearchType.SEARCH_TYPE_SONG -> {
@@ -1230,11 +1250,18 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                                 val song = gson.fromJson(elem, Data.Song::class.java)
                                 curSonglist.add(song)
                             }
-                            printToTextView("获取歌曲列表成功（${curSonglist.size})")
+                            printToTextView("搜索成功（count:${curSonglist.size},page:${currentSearchPage})")
                             runOnUiThread {
                                 songListView.visibility = VISIBLE
                                 folderListView.visibility = GONE
                                 songAdapter?.notifyDataSetChanged()
+                            }
+                        }
+                        else -> {
+                            runOnUiThread {
+                                AlertDialog.Builder(this@VisualActivity)
+                                    .setMessage(dataJson)
+                                    .show()
                             }
                         }
                     }
@@ -1681,7 +1708,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             }
             val song = curSonglist[position]
             if (song != null) {
-                holder.txtTitle?.text = song.title
+                holder.txtTitle?.text = song.title + vipIcon[song.vipState]
                 if (song.singer != null) {
                     holder.txtContent?.text = song.singer.title + "  " + song.album.title
                     holder.imgView?.visibility = VISIBLE
