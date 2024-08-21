@@ -454,13 +454,17 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     Events.API_EVENT_PLAY_STATE_CHANGED -> {
                         curPlayState = extra.getInt(Keys.API_EVENT_KEY_PLAY_STATE)
                         setPlayStateText()
+                        //getCurrTime
+                        val result = qqmusicApi?.execute("getCurrTime", null)
+                        result?.getLong(Keys.API_RETURN_KEY_DATA)?.let {
+                            curPlayTime = it/1000
+                        }
                     }
                     Events.API_EVENT_SONG_FAVORITE_STATE_CHANGED -> {
                         curPlayState = extra.getInt(Keys.API_EVENT_KEY_PLAY_STATE)
                         setPlayStateText()
                     }
                     Events.API_EVENT_LOGIN_STATE_CHANGED -> {
-
                     }
                 }
             }
@@ -863,7 +867,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         }
         val params = Bundle()
         params.putStringArrayList("songIdList", idList)
-        printToTextView("播放歌曲列表... ${song.title},${songList.size}")
+        printToTextView("播放歌曲列表... name=${song.title},songList=${songList.size},index=$curIndex")
         if (curIndex > 0) {
             params.putInt("index", curIndex)
             qqmusicApi?.executeAsync("playSongIdAtIndex", params, object : IQQMusicApiCallback.Stub() {
@@ -875,7 +879,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     if (code == ErrorCodes.ERROR_OK) {
                         runOnUiThread { syncCurrentPlayInfo() }
                     } else {
-                        printToTextView("播放歌曲列表失败（$code)")
+                        printToTextView("播放歌曲列表失败（$code,${result.getString(Keys.API_RETURN_KEY_ERROR)})")
                     }
                 }
             })
@@ -889,7 +893,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     if (code == ErrorCodes.ERROR_OK) {
                         runOnUiThread { syncCurrentPlayInfo() }
                     } else {
-                        printToTextView("播放歌曲列表失败（$code)")
+                        printToTextView("播放歌曲列表失败（$code,${result.getString(Keys.API_RETURN_KEY_ERROR)})")
                     }
                 }
             })
@@ -906,7 +910,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val params = Bundle()
         params.putStringArrayList("songIdList", idList)
         params.putInt("index", index)
-        printToTextView("播放歌曲列表... $index,${songList.size}")
+        printToTextView("播放歌曲列表... index=$index,songList=${songList.size}")
         qqmusicApi?.executeAsync("playSongIdAtIndex", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -916,7 +920,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     runOnUiThread { syncCurrentPlayInfo() }
                 } else {
-                    printToTextView("播放歌曲列表失败（$code)")
+                    printToTextView("播放歌曲列表失败（$code,${result.getString(Keys.API_RETURN_KEY_ERROR)})")
                 }
             }
         })
@@ -932,7 +936,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val params = Bundle()
         params.putStringArrayList("midList", midList)
         params.putInt("index", index)
-        printToTextView("播放歌曲列表... $index,${songList.size}")
+        printToTextView("播放歌曲列表... index=$index,songList=${songList.size}")
         qqmusicApi?.executeAsync("playSongMidAtIndex", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 // 回调的结果
@@ -942,7 +946,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     runOnUiThread { syncCurrentPlayInfo() }
                 } else {
-                    printToTextView("播放歌曲列表失败（$code)")
+                    printToTextView("播放歌曲列表失败（$code,${result.getString(Keys.API_RETURN_KEY_ERROR)})")
                 }
             }
         })
@@ -1007,7 +1011,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         printToTextView("获取收藏状态成功")
                     }
                 } else {
-                    printToTextView("获取收藏状态失败（$code)")
+                    printToTextView("获取收藏状态失败（$code,${result.getString(Keys.API_RETURN_KEY_ERROR)})")
                 }
             }
         })
@@ -1071,10 +1075,10 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         }
                     }
                     if (!authOK) {
-                        Log.d(TAG, "授权失败")
+                        Log.d(TAG, "授权失败,${result.getString(Keys.API_RETURN_KEY_ERROR)}")
                     }
                 } else {
-                    Log.d(TAG, "授权失败（$code)")
+                    Log.d(TAG, "授权失败（$code,${result.getString(Keys.API_RETURN_KEY_ERROR)})")
                 }
 
                 finishBlock(authOK)
@@ -1146,8 +1150,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         progressTimer?.schedule(object : TimerTask() {
             override fun run() {
                 if (curPlayState == PlayState.STARTED) {
-                    if (curPlayTime < totalPlayTime)
-                        curPlayTime += 1
+                    //getCurrTime
+                    //getCurrTime
+                    val result = qqmusicApi?.execute("getCurrTime", null)
+                    result?.getLong(Keys.API_RETURN_KEY_DATA)?.let {
+                        curPlayTime = it/1000
+                    }
                     val message = Message()
                     message.what = 2
                     handle.sendMessage(message)
@@ -1193,20 +1201,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val bool = btnPlayFromChorus.text=="开启高潮模式"
         val params = Bundle()
         params.putBoolean("fromChorus", bool)
-        qqmusicApi?.executeAsync("playFromChorus", params, object : IQQMusicApiCallback.Stub() {
-            override fun onReturn(result: Bundle) {
-                // 回调的结果
-                commonOpen(result)
-                val code = result.getInt(Keys.API_RETURN_KEY_CODE)
-                if (code == ErrorCodes.ERROR_OK) {
-                    printToTextView("设置高潮模式成功")
-                    btnPlayFromChorus.text = if (bool) "关闭高潮模式" else "开启高潮模式"
-                }
-                else {
-                    printToTextView("设置失败:（$code)")
-                }
-            }
-        })
+        val result = qqmusicApi?.execute("playFromChorus", params)
+        val code = result?.getInt(Keys.API_RETURN_KEY_CODE)
+        val msg = result?.getString(Keys.API_RETURN_KEY_ERROR)
+        printToTextView("[高潮模式] ret=${code}, msg=$msg")
+        if (code == 0){
+            btnPlayFromChorus.text = if (bool) "关闭高潮模式" else "开启高潮模式"
+        }
     }
 
     fun onClickSearch(view: View) {
@@ -1534,9 +1535,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 bundle.putInt(Keys.API_PARAM_KEY_SDK_VERSION, CommonCmd.SDK_VERSION)
                 bundle.putString(Keys.API_PARAM_KEY_PLATFORM_TYPE, Config.BIND_PLATFORM)
                 val result = qqmusicApi?.execute("hi", bundle)
-                Log.d(TAG, "sayHi ret:" + result?.getInt(Keys.API_RETURN_KEY_CODE))
+                val code = result?.getInt(Keys.API_RETURN_KEY_CODE)
+                printToTextView("[sayHi]ret:$code")
             } else {
                 Log.d(TAG, "绑定失败")
+                printToTextView("[sayHi]绑定失败")
+
             }
         }
 
@@ -1563,7 +1567,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     fun testSeekBack(v: View) {
         val params = Bundle()
-        params.putLong("time", 1000)
+        params.putLong("time", 15*1000)
         val result = qqmusicApi?.execute("seekBack", params)
         val error = result?.getString(Keys.API_RETURN_KEY_ERROR)
         Log.d(TAG, "error=$error")
@@ -1571,7 +1575,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     fun testSeekForward(v: View) {
         val params = Bundle()
-        params.putLong("time", 1000)
+        params.putLong("time", 15*1000)
         val result = qqmusicApi?.execute("seekForward", params)
         val error = result?.getString(Keys.API_RETURN_KEY_ERROR)
         Log.d(TAG, "error=$error")

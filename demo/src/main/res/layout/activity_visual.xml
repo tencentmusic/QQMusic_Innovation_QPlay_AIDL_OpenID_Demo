@@ -137,8 +137,8 @@
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="playSongMid"
-                android:text="自定义跳转" />
+                android:onClick="sayHi"
+                android:text="hi接口" />
             <Button
                 android:id="@+id/btnSearch"
                 android:layout_width="wrap_content"
@@ -165,14 +165,14 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="testGetFolderList"
-                android:text="快退1s" />
+                android:onClick="testSeekBack"
+                android:text="快退15s" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="testPlayList"
-                android:text="快进1s" />
+                android:onClick="testSeekForward"
+                android:text="快进15s" />
 
             <Button
                 android:layout_width="wrap_content"
