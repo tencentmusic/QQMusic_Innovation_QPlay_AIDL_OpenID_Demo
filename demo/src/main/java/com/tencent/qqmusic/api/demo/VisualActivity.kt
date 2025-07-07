@@ -779,16 +779,16 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
-                    curSonglist.clear()
-                    backSong?.let { curSonglist.add(it) }
+                    runOnUiThread { curSonglist.clear() }
+                    backSong?.let { runOnUiThread { curSonglist.add(it) } }
                     for (elem in array) {
                         val song = gson.fromJson(elem, Data.Song::class.java)
-                        curSonglist.add(song)
+                        runOnUiThread { curSonglist.add(song) }
                     }
                     nextPage?.let {
                         curPage = page
                         it.title = ".. 点击翻页(page=${page})"
-                        curSonglist.add(it)
+                        runOnUiThread { curSonglist.add(it) }
                     }
                     printToTextView("获取歌曲列表成功（${curSonglist.size - 2})")
                     runOnUiThread { songAdapter?.notifyDataSetChanged() }
@@ -866,8 +866,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 curIndex = i
         }
         val params = Bundle()
-        params.putStringArrayList("songIdList", idList)
+        params.putStringArrayList("songIdList", ArrayList(idList.filter { it != "-10001" }))
         printToTextView("播放歌曲列表... name=${song.title},songList=${songList.size},index=$curIndex")
+        songList.map { it.id }.filter { !it.equals("-10001")}.map { printToTextView("1: ${it.split("|")[0].toLong()}, 2: ${it.split("|")[1].toLong()}") }
         if (curIndex > 0) {
             params.putInt("index", curIndex)
             qqmusicApi?.executeAsync("playSongIdAtIndex", params, object : IQQMusicApiCallback.Stub() {
