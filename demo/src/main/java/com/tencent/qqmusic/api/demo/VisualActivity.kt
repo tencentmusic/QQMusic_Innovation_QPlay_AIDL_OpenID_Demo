@@ -637,7 +637,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         params.putString("folderId", folder.id ?: "")
         params.putInt("folderType", folder.type)
         params.putInt("page", page)
-        Log.d(TAG, "[getNormalFolderList] executeAsync getFolderList")
+        Log.d(TAG, "[getNormalFolderList] executeAsync getFolderList，$params")
         qqmusicApi?.executeAsync("getFolderList", params, object : IQQMusicApiCallback.Stub() {
 
             override fun onReturn(result: Bundle) {
@@ -663,12 +663,47 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         tmpList.forEach {
                             curFolderlist.add(it)
                         }
-                        if (folder.type == 0) {
-                            curFolderlist.add(Data.FolderInfo().apply {
-                                this.isSongFolder = false
-                                this.type = Data.FolderType.RADIO
-                                this.mainTitle = "电台"
-                            })
+                        if (folder.type == Data.FolderType.ROOT) {
+                            // 其他特殊歌单
+                            curFolderlist.addAll(
+                                listOf(
+                                    Data.FolderInfo().apply {
+                                        this.isSongFolder = false
+                                        this.type = Data.FolderType.RADIO
+                                        this.mainTitle = "电台"
+                                    },Data.FolderInfo().apply {
+                                        this.isSongFolder = true
+                                        this.id="0"
+                                        this.type = Data.FolderType.MY_FAV_FOLDER
+                                        this.mainTitle = "我收藏的歌单(不通)"
+                                    },
+                                    Data.FolderInfo().apply {
+                                        this.isSongFolder = true
+                                        this.id="0"
+                                        this.type = Data.FolderType.AI_FOLDER
+                                        this.mainTitle = "AI歌单(不通)"
+                                    },
+                                    Data.FolderInfo().apply {
+                                        this.isSongFolder = true
+                                        this.id="0"
+                                        this.type = Data.FolderType.DAY30_SONG_LIST
+                                        this.mainTitle = "每日30首"
+                                    },
+                                    Data.FolderInfo().apply {
+                                        this.isSongFolder = false
+                                        this.id="0"
+                                        this.type = Data.FolderType.PERSONAL_RADIO_FOLDER_SONG_LIST
+                                        this.mainTitle = "个性电台？(不通)"
+                                    },
+                                    Data.FolderInfo().apply {
+                                        this.isSongFolder = true
+                                        this.id="0"
+                                        this.type = Data.FolderType.RECENTPLAY_FOLDER_SONG_LIST
+                                        this.mainTitle = "最近播放"
+                                    },
+                                )
+                            )
+                            folderAdapter?.notifyDataSetChanged()
                         }
                         folderAdapter?.notifyDataSetChanged()
                     }
@@ -962,7 +997,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         this.curPlaySong = gson.fromJson(curSongJson, Data.Song::class.java)
         if (curPlaySong == null)
             return
-        Log.d(TAG, "curPlaySong:${curPlaySong?.title}")
+        Log.d(TAG, "curPlaySong:${curPlaySong?.title},${curPlaySong?.duration}")
 
         txtSongInfos.text = curPlaySong?.title + vipIcon[curPlaySong?.vipState]
         txtAlbum.text = curPlaySong?.album?.title + " - " + curPlaySong?.singer?.title
@@ -982,7 +1017,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         result = qqmusicApi?.execute("getTotalTime", null)
         totalPlayTime = (result?.getLong(Keys.API_RETURN_KEY_DATA) ?: 0) / 1000
 
-        txtPlayTime.text = "$curPlayTime/$totalPlayTime"
+        txtPlayTime.text = "$curPlayTime/$totalPlayTime/${curPlaySong?.duration}"
 
         //使用isFavouriteMid判断curPlaySong
         val midList = ArrayList<String>()
@@ -1088,7 +1123,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun isUserFolder(folderType: Int): Boolean {
-        return Data.FolderType.MY_FOLDER == folderType || folderType == Data.FolderType.MY_FOLDER_SONG_LIST
+        return folderType in listOf(
+            Data.FolderType.MY_FOLDER,
+            Data.FolderType.MY_FOLDER_SONG_LIST,
+            Data.FolderType.DAY30_SONG_LIST,
+            Data.FolderType.MY_FAV_FOLDER,
+            Data.FolderType.PERSONAL_RADIO_FOLDER_SONG_LIST,
+            Data.FolderType.LOCAL_SONG_LIST
+            )
     }
 
     private fun printToTextView(any: Any?) {
@@ -1670,7 +1712,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     }
                 }
                 2 -> {
-                    txtPlayTime.text = "$curPlayTime/$totalPlayTime"
+                    txtPlayTime.text = "$curPlayTime/$totalPlayTime/${curPlaySong?.duration}"
                     if (totalPlayTime > curPlayTime) {
                         progressPlay.max = totalPlayTime.toInt()
                         progressPlay.progress = curPlayTime.toInt()
