@@ -67,4 +67,8 @@
         </activity>
     </application>
 
+    <queries>
+        <package android:name="com.tencent.qqmusic" />
+    </queries>
+
 </manifest>
