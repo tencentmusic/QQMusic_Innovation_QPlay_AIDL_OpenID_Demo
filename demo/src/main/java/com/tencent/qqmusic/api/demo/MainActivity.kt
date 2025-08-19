@@ -249,7 +249,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             } else if (code == ErrorCodes.ERROR_NEED_USER_AUTHENTICATION) {
                 Log.d(TAG, "commonOpen: CommonCmd.loginQQMusic")
                 //qqmusic://qq.com/other/aidl?p={"cmd":"login","callbackurl": "qqmusicapidemo://xxx"}
-                CommonCmd.loginQQMusic(this@MainActivity, "qqmusicapidemo://xxx")
+                CommonCmd.loginQQMusic(this@MainActivity, this.packageName, Config.OPENID_APPID,  "qqmusicapidemo://xxx")
             }
         }
     }

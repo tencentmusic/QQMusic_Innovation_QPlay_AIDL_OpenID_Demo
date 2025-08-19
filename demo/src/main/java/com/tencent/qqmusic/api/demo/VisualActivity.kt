@@ -247,7 +247,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     private fun startQQMusicProcess() {
         Log.d(TAG, "startQQMusicProcess: ")
-        CommonCmd.startQQMusicProcess(this, packageName)
+        CommonCmd.startQQMusicProcess(this, packageName, Config.OPENID_APPID)
     }
 
     private fun verifyCallerRequest() {
@@ -537,7 +537,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 return false
             } else if (code == ErrorCodes.ERROR_NEED_USER_AUTHENTICATION) {
                 Log.d(TAG, "commonOpen: CommonCmd.loginQQMusic 请求用户登录")
-                CommonCmd.loginQQMusic(this@VisualActivity, "qqmusicapidemo://xxx")
+                CommonCmd.loginQQMusic(this@VisualActivity, this.packageName, Config.OPENID_APPID, "qqmusicapidemo://xxx")
                 return false
             } else if (code == ErrorCodes.ERROR_API_NOT_INITIALIZED) {
                 Log.d(TAG, "commonOpen: ERROR_API_NOT_INITIALIZED")
@@ -1354,7 +1354,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         //Log.d(TAG, "sayHi ret:" + result?.getInt(Keys.API_RETURN_KEY_CODE))
 
         //qqmusicApi?.execute()
-        CommonCmd.startQQMusicProcess(this, this.packageName)
+        CommonCmd.startQQMusicProcess(this, this.packageName, Config.OPENID_APPID)
     }
 
     fun testPlayList(v: View) {

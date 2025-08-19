@@ -47,7 +47,7 @@ class LoginExampleActivity : AppCompatActivity() {
                     qqMusicApi = qPlayBindHelper.getQQMusicApi()!!
                     qqMusicApiWrapper = QQMusicApiWrapper(qqMusicApi)
 
-                    CommonCmd.loginQQMusic(this, URI_LOGIN)
+                    CommonCmd.loginQQMusic(this, this.packageName, Config.OPENID_APPID, URI_LOGIN)
 
                 }
             }

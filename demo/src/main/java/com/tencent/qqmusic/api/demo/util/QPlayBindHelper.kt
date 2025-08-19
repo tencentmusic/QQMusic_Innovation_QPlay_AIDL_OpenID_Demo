@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import com.tencent.qqmusic.api.demo.Config
 import com.tencent.qqmusic.third.api.contract.CommonCmd
 import com.tencent.qqmusic.third.api.contract.CommonCmd.AIDL_PLATFORM_TYPE_PHONE
 import com.tencent.qqmusic.third.api.contract.IQQMusicApi
@@ -108,7 +109,7 @@ class QPlayBindHelper(private val context: Context, private val bindPlatform: St
         bindQQMusic({ succeed ->
             if (!succeed) {
                 if (isStartProcess) {
-                    CommonCmd.startQQMusicProcess(context, context.packageName)
+                    CommonCmd.startQQMusicProcess(context, context.packageName, Config.OPENID_APPID)
                 }
                 handler.postDelayed({
                     ensureQQMusicBindByStartProcess(false, callback)
@@ -151,7 +152,7 @@ class QPlayBindHelper(private val context: Context, private val bindPlatform: St
      * 重新绑定qq音乐
      */
     private fun reBindQQMusicService() {
-        CommonCmd.startQQMusicProcess(context, context.packageName)
+        CommonCmd.startQQMusicProcess(context, context.packageName, Config.OPENID_APPID)
         handler.postDelayed(Runnable {
             ensureQQMusicBind {
                 if (it) {
