@@ -700,7 +700,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                                         this.id="0"
                                         this.type = Data.FolderType.RECENTPLAY_FOLDER_SONG_LIST
                                         this.mainTitle = "最近播放"
-                                    },
+                                    }
                                 )
                             )
                             folderAdapter?.notifyDataSetChanged()

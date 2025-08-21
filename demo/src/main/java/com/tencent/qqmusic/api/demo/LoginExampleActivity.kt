@@ -49,7 +49,7 @@ class LoginExampleActivity : AppCompatActivity() {
                     val time = System.currentTimeMillis()
                     val nonce = time.toString()
                     val encryptString = OpenIDHelper.getEncryptString(nonce)
-                    CommonCmd.loginQQMusic(this, packageName, Config.OPENID_APPID, encryptString, true, URI_LOGIN)
+                    CommonCmd.loginQQMusic(this, packageName, Config.OPENID_APPID, "", encryptString, true, URI_LOGIN)
                 }
             }
         }
@@ -63,7 +63,7 @@ class LoginExampleActivity : AppCompatActivity() {
                     val time = System.currentTimeMillis()
                     val nonce = time.toString()
                     val encryptString = OpenIDHelper.getEncryptString(nonce)
-                    CommonCmd.loginQQMusic(this, packageName, Config.OPENID_APPID, "", false, URI_LOGIN)
+                    CommonCmd.loginQQMusic(this, packageName, Config.OPENID_APPID, "", encryptString, false, URI_LOGIN)
                 }
             }
         }
