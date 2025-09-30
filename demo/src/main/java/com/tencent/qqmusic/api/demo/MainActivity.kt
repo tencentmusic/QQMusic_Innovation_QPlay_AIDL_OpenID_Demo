@@ -14,7 +14,6 @@ import android.view.View
 import android.widget.*
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
 import com.tencent.qqmusic.third.api.contract.*
-import kotlinx.android.synthetic.main.activity_main.*
 
 @SuppressLint("SetTextI18n")
 /**
