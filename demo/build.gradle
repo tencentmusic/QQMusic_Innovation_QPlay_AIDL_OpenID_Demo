@@ -37,7 +37,7 @@ dependencies {
         exclude module: 'support-v4'
     }
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
-    implementation "com.tencent.qqmusic.innovation:aidl-api-sdk:1.1.0"
+    implementation "com.tencent.qqmusic.innovation:aidl-api-sdk:${API_SDK_VERSION}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.41"
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.2.41"
