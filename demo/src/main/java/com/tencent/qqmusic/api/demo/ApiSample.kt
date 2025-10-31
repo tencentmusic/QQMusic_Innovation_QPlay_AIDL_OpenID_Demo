@@ -46,17 +46,22 @@ object ApiSample {
         Log.i(TAG, "sayHi ret:" + result!!.getInt(Keys.API_RETURN_KEY_CODE))
     }
 
-    fun playSongMid(api: IQQMusicApi?, ids: ArrayList<String>, block: (() -> Unit)) {
+    fun openQQMusic(api: IQQMusicApi?) {
+        val bundle = Bundle()
+        val result = api?.execute("openMusic", bundle)
+    }
+
+    fun playSongMid(api: IQQMusicApi?, ids: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("midList", ids)
         api?.executeAsync("playSongMid", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
 
-    private fun playSongMidAtIndex(api: IQQMusicApi?, songList: List<Data.Song>, index: Int, block: (() -> Unit)) {
+    private fun playSongMidAtIndex(api: IQQMusicApi?, songList: List<Data.Song>, index: Int, block: ((Bundle) -> Unit)) {
         val midList = ArrayList<String>()
         for (i in songList.indices) {
             midList.add(songList[i].mid)
@@ -68,17 +73,17 @@ object ApiSample {
         Log.i(TAG, "[playSongMidAtIndex] 播放歌曲列表... $index,${songList.size}")
         api?.executeAsync("playSongMidAtIndex", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
 
-    fun playSongLocalPath(api: IQQMusicApi?, pathList: ArrayList<String>, block: (() -> Unit)) {
+    fun playSongLocalPath(api: IQQMusicApi?, pathList: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("pathList", pathList)
         api?.executeAsync("playSongLocalPath", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
@@ -125,80 +130,80 @@ object ApiSample {
         return gson.fromJson(curSongJson, Data.Song::class.java)
     }
 
-    fun addToFavourite(api: IQQMusicApi?, midList: ArrayList<String>, block: (() -> Unit)) {
+    fun addToFavourite(api: IQQMusicApi?, midList: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("midList", midList)
         api?.executeAsync("addToFavourite", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
 
-    fun removeFromFavourite(api: IQQMusicApi?, midList: ArrayList<String>, block: (() -> Unit)) {
+    fun removeFromFavourite(api: IQQMusicApi?, midList: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("midList", midList)
         api?.executeAsync("removeFromFavourite", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
 
-    fun addLocalPathToFavourite(api: IQQMusicApi?, localPathList: ArrayList<String>, block: (() -> Unit)) {
+    fun addLocalPathToFavourite(api: IQQMusicApi?, localPathList: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("localPathList", localPathList)
         api?.executeAsync("addLocalPathToFavourite", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
 
-    fun removeLocalPathFromFavourite(api: IQQMusicApi?, localPathList: ArrayList<String>, block: (() -> Unit)) {
+    fun removeLocalPathFromFavourite(api: IQQMusicApi?, localPathList: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("localPathList", localPathList)
         api?.executeAsync("removeLocalPathFromFavourite", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
 
-    fun isFavouriteMid(api: IQQMusicApi?, midList: ArrayList<String>, block: ((ret: BooleanArray?) -> Unit)) {
+    fun isFavouriteMid(api: IQQMusicApi?, midList: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("midList", midList)
         api?.executeAsync("isFavouriteMid", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 val ret = result.getBooleanArray(Keys.API_RETURN_KEY_DATA)
-                block(ret)
+                block(result)
             }
         })
     }
 
-    fun isFavouriteLocalPath(api: IQQMusicApi?, localPathList: ArrayList<String>, block: ((ret: BooleanArray?) -> Unit)) {
+    fun isFavouriteLocalPath(api: IQQMusicApi?, localPathList: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("localPathList", localPathList)
         api?.executeAsync("isFavouriteLocalPath", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
                 val ret = result.getBooleanArray(Keys.API_RETURN_KEY_DATA)
-                block(ret)
+                block(result)
             }
         })
     }
 
-    fun registerEventListener(api: IQQMusicApi?, events: ArrayList<String>, block: (() -> Unit)) {
+    fun registerEventListener(api: IQQMusicApi?, events: ArrayList<String>, block: ((String, Bundle) -> Unit)) {
         api?.registerEventListener(events, object : IQQMusicApiEventListener.Stub() {
             override fun onEvent(event: String, extra: Bundle) {
-                block()
+                block(event, extra)
             }
         })
     }
 
-    fun unregisterEventListener(api: IQQMusicApi?, events: ArrayList<String>, block: (() -> Unit)) {
+    fun unregisterEventListener(api: IQQMusicApi?, events: ArrayList<String>, block: ((String, Bundle) -> Unit)) {
         api?.unregisterEventListener(events, object : IQQMusicApiEventListener.Stub() {
             override fun onEvent(event: String, extra: Bundle) {
-                block()
+                block(event, extra)
             }
         })
     }
@@ -210,23 +215,23 @@ object ApiSample {
     }
 
     @Deprecated("Use playSongMid instead.")
-    fun playSongId(api: IQQMusicApi?, ids: ArrayList<String>, block: (() -> Unit)) {
+    fun playSongId(api: IQQMusicApi?, ids: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("songIdList", ids)
         api?.executeAsync("playSongId", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }
 
     @Deprecated("Use playSongMidAtIndex instead.")
-    fun playSongIdAtIndex(api: IQQMusicApi?, ids: ArrayList<String>, block: (() -> Unit)) {
+    fun playSongIdAtIndex(api: IQQMusicApi?, ids: ArrayList<String>, block: ((Bundle) -> Unit)) {
         val params = Bundle()
         params.putStringArrayList("songIdList", ids)
         api?.executeAsync("playSongIdAtIndex", params, object : IQQMusicApiCallback.Stub() {
             override fun onReturn(result: Bundle) {
-                block()
+                block(result)
             }
         })
     }

@@ -14,7 +14,6 @@ import android.view.View
 import android.widget.*
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
 import com.tencent.qqmusic.third.api.contract.*
-import kotlinx.android.synthetic.main.activity_main.*
 
 @SuppressLint("SetTextI18n")
 /**
@@ -46,6 +45,11 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
 
     private val executeButton by lazy { findViewById<Button>(R.id.bt_execute) }
     private val executeAsyncButton by lazy { findViewById<Button>(R.id.bt_execute_async) }
+
+    private val btRegister by lazy { findViewById<Button>(R.id.bt_register) }
+    private val btUnregister by lazy { findViewById<Button>(R.id.bt_unregister) }
+    private val tvResult by lazy { findViewById<TextView>(R.id.tv_result) }
+    private val toolBar by lazy { findViewById<Toolbar>(R.id.toolbar) }
 
     private val eventListener = object : IQQMusicApiEventListener.Stub() {
         override fun onEvent(event: String, extra: Bundle) {
@@ -88,7 +92,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
 
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        toolbar.setNavigationOnClickListener { onBackPressed() }
+        toolBar.setNavigationOnClickListener { onBackPressed() }
 
         //init actionText 随着action改变 设置key value的值
         val adapter = ArrayAdapter<String>(this,
@@ -204,13 +208,15 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             connectStateTextView.text = "failed to connect"
         }
 
-        bt_register.setOnClickListener {
+        btRegister.setOnClickListener {
             qqmusicApi?.registerEventListener(arrayListOf(Events.API_EVENT_SONG_FAVORITE_STATE_CHANGED), eventListener)
         }
-        bt_unregister.setOnClickListener {
+        btUnregister.setOnClickListener {
             qqmusicApi?.unregisterEventListener(arrayListOf(Events.API_EVENT_SONG_FAVORITE_STATE_CHANGED), eventListener)
         }
     }
+
+
 
     /**
      * 调用QQ音乐AIDL接口
@@ -293,13 +299,13 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     private fun print(result: Any?) {
         runOnUiThread {
             if (result == null) {
-                tv_result.text = "null"
+                tvResult.text = "null"
             } else {
                 if (result is Bundle) {
-                    tv_result.text = result.toPrintableString()
+                    tvResult.text = result.toPrintableString()
                     Log.d(TAG, result.toPrintableString())
                 } else {
-                    tv_result.text = result.toString()
+                    tvResult.text = result.toString()
                     Log.d(TAG, result.toString())
                 }
             }

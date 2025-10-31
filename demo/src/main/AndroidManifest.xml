@@ -71,6 +71,7 @@
 
     <queries>
         <package android:name="com.tencent.qqmusic" />
+        <package android:name="com.tencent.qqmusictv" />
     </queries>
 
 </manifest>
