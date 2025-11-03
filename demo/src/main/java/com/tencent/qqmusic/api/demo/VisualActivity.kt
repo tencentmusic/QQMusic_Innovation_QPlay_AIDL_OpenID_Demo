@@ -22,6 +22,7 @@ import com.tencent.qqmusic.api.demo.Config.*
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
 import com.tencent.qqmusic.api.demo.util.QPlayBindHelper
 import com.tencent.qqmusic.third.api.contract.*
+import com.tencent.qqmusic.third.api.contract.CommonCmd
 import com.tencent.qqmusic.third.api.contract.CommonCmd.*
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -176,6 +177,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                             BIND_PLATFORM = CommonCmd.AIDL_PLATFORM_TYPE_CAR
                         }
                     }
+                    init(BIND_PLATFORM)
                     it.title = "设备类型:" + Config.BIND_PLATFORM
                 }
                 builder.create().show()
@@ -251,6 +253,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
      * 授权按钮，绑定QQ音乐服务，失败时尝试启动QQ音乐进程，再不断进行重试
      */
     private fun onActiveClick(view: View) {
+        CommonCmd.init(BIND_PLATFORM)
         val bindRet = bindQQMusicApiService(BIND_PLATFORM)
         //startQQMusicProcess()
         if (!bindRet) {
@@ -685,7 +688,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                                     },
                                     Data.FolderInfo().apply {
                                         this.isSongFolder = true
-                                        this.id="0"
+                                        this.id="202|0"
                                         this.type = Data.FolderType.DAY30_SONG_LIST
                                         this.mainTitle = "每日30首"
                                     },
@@ -814,25 +817,36 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
-                    runOnUiThread { curSonglist.clear() }
-                    backSong?.let { runOnUiThread { curSonglist.add(it) } }
+                    
+                    // 在后台线程准备好所有数据
+                    val tempSongList = ArrayList<Data.Song>()
+                    backSong?.let { tempSongList.add(it) }
                     for (elem in array) {
                         val song = gson.fromJson(elem, Data.Song::class.java)
-                        runOnUiThread { curSonglist.add(song) }
+                        tempSongList.add(song)
                     }
                     nextPage?.let {
                         curPage = page
                         it.title = ".. 点击翻页(page=${page})"
-                        runOnUiThread { curSonglist.add(it) }
+                        tempSongList.add(it)
                     }
-                    printToTextView("获取歌曲列表成功（${curSonglist.size - 2})")
-                    runOnUiThread { songAdapter?.notifyDataSetChanged() }
+                    
+                    // 一次性在UI线程中更新数据
+                    runOnUiThread {
+                        curSonglist.clear()
+                        curSonglist.addAll(tempSongList)
+                        songAdapter?.notifyDataSetChanged()
+                        printToTextView("获取歌曲列表成功（${curSonglist.size - 2})")
+                    }
                 } else {
-                    if (curSonglist.isEmpty()){
-                        backSong?.let { curSonglist.add(it) }
+                    // 错误处理也要在UI线程中
+                    runOnUiThread {
+                        if (curSonglist.isEmpty()){
+                            backSong?.let { curSonglist.add(it) }
+                            songAdapter?.notifyDataSetChanged()
+                        }
+                        printToTextView("获取歌曲列表失败（$code）")
                     }
-                    printToTextView("获取歌曲列表失败（$code)")
-
                 }
 
             }
@@ -870,21 +884,30 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
-                    curSonglist.clear()
-                    backSong?.let { curSonglist.add(it) }
-
+                    
+                    // 在后台线程准备好所有数据
+                    val tempSongList = ArrayList<Data.Song>()
+                    backSong?.let { tempSongList.add(it) }
                     for (elem in array) {
                         val song = gson.fromJson(elem, Data.Song::class.java)
-                        curSonglist.add(song)
+                        tempSongList.add(song)
                     }
                     nextPage?.let {
                         curPage = page
-                        curSonglist.add(it)
+                        tempSongList.add(it)
                     }
-                    printToTextView("获取歌曲列表成功（${curSonglist.size-2})")
-                    runOnUiThread { songAdapter?.notifyDataSetChanged() }
+                    
+                    // 一次性在UI线程中更新数据
+                    runOnUiThread {
+                        curSonglist.clear()
+                        curSonglist.addAll(tempSongList)
+                        songAdapter?.notifyDataSetChanged()
+                        printToTextView("获取歌曲列表成功（${curSonglist.size-2})")
+                    }
                 } else {
-                    printToTextView("获取歌曲列表失败（$code)")
+                    runOnUiThread {
+                        printToTextView("获取歌曲列表失败（$code）")
+                    }
                 }
 
             }
@@ -903,7 +926,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         val params = Bundle()
         params.putStringArrayList("songIdList", ArrayList(idList.filter { it != "-10001" }))
         printToTextView("播放歌曲列表... name=${song.title},songList=${songList.size},index=$curIndex")
-        songList.map { it.id }.filter { !it.equals("-10001")}.map { printToTextView("1: ${it.split("|")[0].toLong()}, 2: ${it.split("|")[1].toLong()}") }
+        songList.map { it.id }.filter { !it.equals("-10001")}.map {
+            val splitList = it.split("|")
+            if(splitList.size> 1) {
+                printToTextView("1: ${it.split("|")[0].toLong()}, 2: ${it.split("|")[1].toLong()}")
+            } else {
+                printToTextView("1: ${it.split("|")[0].toLong()}")
+            }
+        }
         if (curIndex > 0) {
             params.putInt("index", curIndex)
             qqmusicApi?.executeAsync("playSongIdAtIndex", params, object : IQQMusicApiCallback.Stub() {
@@ -1155,15 +1185,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         Thread(Runnable {
             try {
                 val bmp = getURLimage(url)
-                if (bmp != null) {
-                    val msg = Message.obtain()
-                    msg.what = 1
-                    msg.obj = bmp
-                    handle.sendMessage(msg)
+                runOnUiThread {
+                    if (bmp != null) {
+                        songPic.setImageBitmap(bmp)
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // 这里可以处理异常，例如设置一个默认图片或显示错误信息
             }
         }).start()
     }
@@ -1201,7 +1229,13 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                     }
                     val message = Message()
                     message.what = 2
-                    handle.sendMessage(message)
+                    runOnUiThread {
+                        txtPlayTime.text = "$curPlayTime/$totalPlayTime/${curPlaySong?.duration}"
+                        if (totalPlayTime > curPlayTime) {
+                            progressPlay.max = totalPlayTime.toInt()
+                            progressPlay.progress = curPlayTime.toInt()
+                        }
+                    }
                 }
             }
         }, 1000, 1000/* 表示1000毫秒之後，每隔1000毫秒執行一次 */)
@@ -1349,17 +1383,22 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                             }
                         }
                         Data.SearchType.SEARCH_TYPE_SIMILAR_SONG, Data.SearchType.SEARCH_TYPE_SONG -> {
-                            curSonglist.clear()
-                            backSong?.let { curSonglist.add(it) }
+                            // 在后台线程准备好所有数据
+                            val tempSongList = ArrayList<Data.Song>()
+                            backSong?.let { tempSongList.add(it) }
                             for (elem in array) {
                                 val song = gson.fromJson(elem, Data.Song::class.java)
-                                curSonglist.add(song)
+                                tempSongList.add(song)
                             }
-                            printToTextView("搜索成功（count:${curSonglist.size},page:${currentSearchPage})")
+                            
+                            // 一次性在UI线程中更新数据
                             runOnUiThread {
+                                curSonglist.clear()
+                                curSonglist.addAll(tempSongList)
+                                songAdapter?.notifyDataSetChanged()
                                 folderListView.visibility = GONE
                                 songListView.visibility = VISIBLE
-                                songAdapter?.notifyDataSetChanged()
+                                printToTextView("搜索成功（count:${curSonglist.size},page:${currentSearchPage})")
                             }
                         }
                         else -> {
@@ -1381,7 +1420,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         curPlaySong?.run {
             val params = Bundle()
             params.putString("songId", id)
-            qqmusicApi?.executeAsync("getLyricIncludeEndTime", params, object : IQQMusicApiCallback.Stub() {
+            val methodString = if(BIND_PLATFORM == CommonCmd.AIDL_PLATFORM_TYPE_TV) "getLyricWithId" else "getLyricIncludeEndTime"
+            qqmusicApi?.executeAsync(methodString, params, object : IQQMusicApiCallback.Stub() {
                 override fun onReturn(result: Bundle) {
                     Log.d(TAG, "getLyric onReturn")
                     commonOpen(result)
@@ -1541,24 +1581,32 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                 if (code == ErrorCodes.ERROR_OK) {
                     val dataJson = result.getString(Keys.API_RETURN_KEY_DATA)
                     val array = JsonParser().parse(dataJson).asJsonArray
-                    curSonglist.clear()
-                    backSong?.let { curSonglist.add(it) }
+                    
+                    // 在后台线程准备好所有数据
+                    val tempSongList = ArrayList<Data.Song>()
+                    backSong?.let { tempSongList.add(it) }
                     for (elem in array) {
                         val song = gson.fromJson(elem, Data.Song::class.java)
-                        curSonglist.add(song)
+                        tempSongList.add(song)
                     }
                     nextPage?.let {
                         curPage = 0
-                        curSonglist.add(it)
+                        tempSongList.add(it)
                     }
-                    printToTextView("获取歌曲列表成功（${curSonglist.size})")
+                    
+                    // 一次性在UI线程中更新数据
                     runOnUiThread {
+                        curSonglist.clear()
+                        curSonglist.addAll(tempSongList)
+                        songAdapter?.notifyDataSetChanged()
                         songListView.visibility = VISIBLE
                         folderListView.visibility = GONE
-                        songAdapter?.notifyDataSetChanged()
+                        printToTextView("获取歌曲列表成功（${curSonglist.size})")
                     }
                 } else {
-                    printToTextView("获取歌曲列表失败（$code)")
+                    runOnUiThread {
+                        printToTextView("获取歌曲列表失败（$code）")
+                    }
                 }
             }
         })
@@ -1700,28 +1748,6 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
         }
     }
-
-
-    private val handle = object : Handler() {
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                1 -> {
-                    if (msg.obj != null && msg.obj is Bitmap) {
-                        val bmp = msg.obj as Bitmap
-                        songPic.setImageBitmap(bmp)
-                    }
-                }
-                2 -> {
-                    txtPlayTime.text = "$curPlayTime/$totalPlayTime/${curPlaySong?.duration}"
-                    if (totalPlayTime > curPlayTime) {
-                        progressPlay.max = totalPlayTime.toInt()
-                        progressPlay.progress = curPlayTime.toInt()
-                    }
-                }
-            }
-        }
-    }
-
 
     inner class ViewHolder(itemView: View?, isSongItem: Boolean) {
         var txtTitle: TextView? = null

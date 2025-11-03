@@ -11,7 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:testOnly="false"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:networkSecurityConfig="@xml/network_security_config"
+        >
 
         <activity android:name=".ExampleListActivity">
             <intent-filter>
@@ -28,13 +30,11 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".CallbackActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -48,7 +48,6 @@
 
         <activity
             android:name=".pcm.PcmExampleActivityNew"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <service
@@ -56,7 +55,6 @@
             android:process=".play" />
         <activity
             android:name=".LoginExampleActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <!--            <intent-filter>-->
             <!--                <action android:name="android.intent.action.VIEW" />-->
