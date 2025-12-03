@@ -176,6 +176,12 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                         2 -> {
                             BIND_PLATFORM = CommonCmd.AIDL_PLATFORM_TYPE_CAR
                         }
+                        3 -> {
+                            BIND_PLATFORM = CommonCmd.AIDL_PLATFORM_TYPE_LITE
+                        }
+                        4 -> {
+                            BIND_PLATFORM = CommonCmd.AIDL_PLATFORM_TYPE_LITE_DEMO
+                        }
                     }
                     init(BIND_PLATFORM)
                     it.title = "设备类型:" + Config.BIND_PLATFORM
@@ -370,6 +376,14 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             AIDL_PLATFORM_TYPE_TV -> {
                 intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
                 intent.`package` = "com.tencent.qqmusictv"
+            }
+            AIDL_PLATFORM_TYPE_LITE -> {
+                intent = Intent("com.tencent.qqmusiclite.third.api.QQMusicApiService")
+                intent.`package` = "com.miui.player"
+            }
+            AIDL_PLATFORM_TYPE_LITE_DEMO -> {
+                intent = Intent("com.tencent.qqmusiclite.third.api.QQMusicApiService")
+                intent.`package` = "com.miui.player_preview"
             }
             else -> {
                 Log.e(TAG, "platform error!", RuntimeException())
@@ -677,8 +691,8 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                                     },Data.FolderInfo().apply {
                                         this.isSongFolder = true
                                         this.id="0"
-                                        this.type = Data.FolderType.MY_FAV_FOLDER
-                                        this.mainTitle = "我收藏的歌单(不通)"
+                                        this.type = Data.FolderType.MYFAV_FOLDER_SONG_LIST
+                                        this.mainTitle = "我收藏的歌单"
                                     },
                                     Data.FolderInfo().apply {
                                         this.isSongFolder = true
@@ -694,9 +708,9 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                                     },
                                     Data.FolderInfo().apply {
                                         this.isSongFolder = false
-                                        this.id="0"
+                                        this.id="99|10004"
                                         this.type = Data.FolderType.PERSONAL_RADIO_FOLDER_SONG_LIST
-                                        this.mainTitle = "个性电台？(不通)"
+                                        this.mainTitle = "个性电台"
                                     },
                                     Data.FolderInfo().apply {
                                         this.isSongFolder = true

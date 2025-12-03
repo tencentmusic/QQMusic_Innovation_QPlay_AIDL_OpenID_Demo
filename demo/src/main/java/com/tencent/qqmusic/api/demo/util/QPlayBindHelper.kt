@@ -140,6 +140,14 @@ class QPlayBindHelper(private val context: Context, private val bindPlatform: St
                 intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
                 intent.`package` = "com.tencent.qqmusictv"
             }
+            CommonCmd.AIDL_PLATFORM_TYPE_LITE -> {
+                intent = Intent("com.tencent.qqmusiclite.third.api.QQMusicApiService")
+                intent.`package` = "com.miui.player"
+            }
+            CommonCmd.AIDL_PLATFORM_TYPE_LITE_DEMO -> {
+                intent = Intent("com.tencent.qqmusiclite.third.api.QQMusicApiService")
+                intent.`package` = "com.miui.player_preview"
+            }
             else -> {
                 Log.e(TAG, "platform 不匹配")
                 Toast.makeText(context, "请先在Config中填写配置信息！", Toast.LENGTH_SHORT).show()

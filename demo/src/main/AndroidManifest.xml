@@ -70,6 +70,8 @@
     <queries>
         <package android:name="com.tencent.qqmusic" />
         <package android:name="com.tencent.qqmusictv" />
+        <package android:name="com.miui.player" />
+        <package android:name="com.miui.player_preview" />
     </queries>
 
 </manifest>

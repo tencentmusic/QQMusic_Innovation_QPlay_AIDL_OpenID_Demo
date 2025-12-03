@@ -3,6 +3,8 @@
         <item>手机</item>
         <item>TV</item>
         <item>Car</item>
+        <item>Lite</item>
+        <item>Lite-demo</item>
     </string-array>
     <string-array name="sear_type">
         <item>综合(new)</item>
