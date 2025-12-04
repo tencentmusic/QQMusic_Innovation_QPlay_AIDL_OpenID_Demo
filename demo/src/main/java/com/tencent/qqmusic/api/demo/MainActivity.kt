@@ -278,6 +278,12 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             CommonCmd.AIDL_PLATFORM_TYPE_TV -> {
                 intent = Intent("com.tencent.qqmusictv.third.api.QQMusicApiService")
                 intent.`package` = "com.tencent.qqmusictv"}
+            CommonCmd.AIDL_PLATFORM_TYPE_LITE -> {
+                intent = Intent("com.tencent.qqmusiclite.third.api.QQMusicApiService")
+                intent.`package` = "com.miui.player"}
+            CommonCmd.AIDL_PLATFORM_TYPE_LITE_DEMO -> {
+                intent = Intent("com.tencent.qqmusiclite.third.api.QQMusicApiService")
+                intent.`package` = "com.miui.player_preview"}
             else -> {
                 Log.e(TAG,"platform error!",RuntimeException())
             }
@@ -318,5 +324,19 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
  * 每一个key对应字符串使用"\n"分割，并以key:value格式输出
  */
 fun Bundle.toPrintableString(): String {
-    return keySet().joinToString(separator = "\n", transform = { "$it: ${get(it)}" })
+    return keySet().joinToString(separator = "\n", transform = { "$it: ${
+        when (val value = get(it)) {
+            is BooleanArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is IntArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is LongArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is FloatArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is DoubleArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is ByteArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is ShortArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is CharArray -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is Array<*> -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            is ArrayList<*> -> value.joinToString(prefix = "[", postfix = "]", separator = ", ")
+            else -> value
+        }
+    }" })
 }

@@ -1365,7 +1365,11 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                             for (elem in array) {
                                 val album = gson.fromJson(elem, Data.Album::class.java)
                                 val albumFolder = Data.FolderInfo().apply {
-                                    id = album.mid
+                                    if(BIND_PLATFORM == CommonCmd.AIDL_PLATFORM_TYPE_LITE_DEMO || BIND_PLATFORM == CommonCmd.AIDL_PLATFORM_TYPE_LITE) {
+                                        id = album.id.toString()
+                                    } else {
+                                        id = album.mid
+                                    }
                                     mainTitle = album.title
                                     subTitle = "专辑"
                                     setType(Data.FolderType.ALBUM_FOLDER_SONG_LIST)
