@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
                 //putLong("from", 1)
             }
             Thread {
-                execute(actionEditText.text.toString(), null, false)
+                execute(actionEditText.text.toString(), params, false)
             }.start()
         }
 
