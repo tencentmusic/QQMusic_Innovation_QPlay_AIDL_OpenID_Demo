@@ -87,13 +87,13 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         
         // 示例数据
         val EXAMPLE_DATA = mapOf(
-            "playSongMid" to mapOf("midList" to "001JD1SR29d8FX\n003fA5nd3l4MGe"),
-            "playSongMidAtIndex" to mapOf("midList" to "001JD1SR29d8FX\n003fA5nd3l4MGe", "index" to "0"),
+            "playSongMid" to mapOf("midList" to "0039MnYb0qxYhV\n003fA5nd3l4MGe"),
+            "playSongMidAtIndex" to mapOf("midList" to "0039MnYb0qxYhV\n003fA5nd3l4MGe", "index" to "0"),
             "playSongId" to mapOf("songIdList" to "102065756\n102254061"),
             "playSongIdAtIndex" to mapOf("songIdList" to "102065756\n102254061", "index" to "0"),
-            "addToFavourite" to mapOf("midList" to "001JD1SR29d8FX"),
-            "removeFromFavourite" to mapOf("midList" to "001JD1SR29d8FX"),
-            "isFavouriteMid" to mapOf("midList" to "001JD1SR29d8FX", "idList" to "", "typeList" to ""),
+            "addToFavourite" to mapOf("midList" to "0039MnYb0qxYhV"),
+            "removeFromFavourite" to mapOf("midList" to "0039MnYb0qxYhV"),
+            "isFavouriteMid" to mapOf("midList" to "0039MnYb0qxYhV", "idList" to "", "typeList" to ""),
             "getPlayList" to mapOf("page" to "0"),
             "getFolderList" to mapOf("folderId" to "1", "folderType" to "1", "page" to "0"),
             "getSongList" to mapOf("folderId" to "1", "folderType" to "1", "page" to "0"),
