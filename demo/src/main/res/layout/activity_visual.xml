@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".VisualActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".VisualActivity">
 
-    <include
-        android:id="@+id/top_bar"
-        layout="@layout/common_top_bar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_layout"
         android:layout_width="match_parent"
-        android:layout_height="40dp"/>
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
 
     <RelativeLayout
         android:id="@+id/playerPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_bar"
+        android:layout_below="@id/appbar_layout"
         android:layout_marginTop="5dp">
 
         <ImageView
@@ -23,7 +33,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginLeft="5dp"
-            android:layout_marginTop="5dp"/>
+            android:layout_marginTop="5dp" />
 
         <TextView
             android:id="@+id/txtPlayTime"
@@ -32,7 +42,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginTop="5dp"
             android:layout_marginRight="5dp"
-            android:text="时间"/>
+            android:text="时间" />
 
         <TextView
             android:id="@+id/txtSongInfos"
@@ -42,7 +52,7 @@
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@+id/SongPic"
             android:ems="10"
-            android:text="歌曲信息"/>
+            android:text="歌曲信息" />
 
         <TextView
             android:id="@+id/txtAlbum"
@@ -52,7 +62,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@+id/SongPic"
-            android:text="专辑-歌手"/>
+            android:text="专辑-歌手" />
 
         <LinearLayout
             android:id="@+id/ll_button"
@@ -66,8 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="onActiveClick"
-                android:text="授权"/>
+                android:text="授权" />
 
             <Button
                 android:id="@+id/btnPlayPre"
@@ -75,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onPlayPre"
-                android:text="上一首"/>
+                android:text="上一首" />
 
             <Button
                 android:id="@+id/btnPlayPause"
@@ -83,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onPlayPause"
-                android:text="播放"/>
+                android:text="播放" />
 
             <Button
                 android:id="@+id/btnPlayNext"
@@ -91,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onPlayNext"
-                android:text="下一首"/>
+                android:text="下一首" />
 
             <Button
                 android:id="@+id/btnLove"
@@ -99,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onLoveClick"
-                android:text="收藏"/>
+                android:text="收藏" />
 
         </LinearLayout>
 
@@ -115,32 +124,84 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onClickOpiSearch"
-                android:text="Opi搜索"/>
+                android:text="Opi搜索" />
 
             <Button
                 android:id="@+id/btnOpiMvTag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onClickOpiMvTag"
-                android:text="Opi重命名"/>
+                android:text="Opi重命名" />
 
             <Button
                 android:id="@+id/btnSchemeAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onClickSchemeAction"
-                android:text="自定义跳转"/>
+                android:onClick="sayHi"
+                android:text="hi接口" />
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClickSearch"
+                android:text="搜索" />
+        </LinearLayout>
 
 
+        <LinearLayout
+            android:id="@+id/ll_test_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_opi_button"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnLyric"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClickLyric"
+                android:text="歌词" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="testSeekBack"
+                android:text="快退15s" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="testSeekForward"
+                android:text="快进15s" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="fetchDaily30"
+                android:text="每日30首" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_test_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_test_1"
+            >
+        <Button
+            android:id="@+id/btnPlayFromChorus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickPlayFromChorus"
+            android:text="开启高潮模式" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/txtResult"
             android:layout_width="fill_parent"
             android:layout_height="35dp"
-            android:layout_below="@+id/ll_opi_button"
+            android:layout_below="@+id/ll_test_2"
             android:ems="10"
-            android:text="Debug informations"/>
+            android:text="Debug informations" />
 
         <ProgressBar
             android:id="@+id/ProgressPlay"
@@ -151,7 +212,7 @@
             android:layout_marginTop="2dp"
             android:max="1000"
             android:progress="0"
-            android:secondaryProgress="0"/>
+            android:secondaryProgress="0" />
     </RelativeLayout>
 
 
@@ -165,14 +226,21 @@
             android:id="@+id/listview_folder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"/>
+            android:layout_marginTop="5dp" />
 
         <ListView
             android:id="@+id/listview_song"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
+
+        <ListView
+            android:id="@+id/listview_album"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:visibility="gone" />
     </RelativeLayout>
 
 

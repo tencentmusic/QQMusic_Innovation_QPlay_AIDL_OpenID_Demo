@@ -7,8 +7,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.1.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41"
+        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.41"
     }
 }
 
@@ -17,6 +17,15 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
+        mavenLocal()
+        // SDK仓库
+        maven {
+            url 'http://ct.y.qq.com/TVapp/nexus/repository/maven-public/'
+            credentials {
+                username 'tvsdk_client'
+                password 'tvsdk-client'
+            }
+        }
         flatDir {
             dirs 'libs'
         }

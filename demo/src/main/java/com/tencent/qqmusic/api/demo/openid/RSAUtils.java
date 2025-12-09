@@ -1,5 +1,7 @@
 package com.tencent.qqmusic.api.demo.openid;
 
+import android.util.Base64;
+
 import java.io.ByteArrayOutputStream;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -16,8 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
-
-import android.util.Base64;
 
 public class RSAUtils {
     /**
@@ -64,7 +64,7 @@ public class RSAUtils {
         KeyPair keyPair = keyPairGen.generateKeyPair();
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        Map<String, Object> keyMap = new HashMap<String, Object>(2);
+        Map<String, Object> keyMap = new HashMap<>(2);
         keyMap.put(PUBLIC_KEY, publicKey);
         keyMap.put(PRIVATE_KEY, privateKey);
         return keyMap;
@@ -163,8 +163,7 @@ public class RSAUtils {
         //解密
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
         byte[] deBytes = cipher.doFinal(enBytes);
-        String decryptString = new String(deBytes);
-        return decryptString;
+        return new String(deBytes);
 
     }
 
@@ -173,8 +172,7 @@ public class RSAUtils {
         keyBytes = Base64.decode(key, Base64.DEFAULT);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-        return privateKey;
+        return keyFactory.generatePrivate(keySpec);
     }
 
     /**
@@ -297,10 +295,8 @@ public class RSAUtils {
      *
      * @param keyMap 密钥对
      * @return
-     * @throws Exception
      */
-    public static String getPrivateKey(Map<String, Object> keyMap)
-            throws Exception {
+    public static String getPrivateKey(Map<String, Object> keyMap) {
         Key key = (Key) keyMap.get(PRIVATE_KEY);
         return Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
     }
@@ -310,10 +306,8 @@ public class RSAUtils {
      *
      * @param keyMap 密钥对
      * @return
-     * @throws Exception
      */
-    public static String getPublicKey(Map<String, Object> keyMap)
-            throws Exception {
+    public static String getPublicKey(Map<String, Object> keyMap) {
         Key key = (Key) keyMap.get(PUBLIC_KEY);
         return Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
     }

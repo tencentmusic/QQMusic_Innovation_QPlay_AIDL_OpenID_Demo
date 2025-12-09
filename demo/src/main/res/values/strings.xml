@@ -1,4 +1,12 @@
 <resources>
-    <string name="app_name">QQMusicApiDemo</string>
+    <string name="app_name">ApiDemoQQMusic</string>
     <string name="title_activity_qrcode">QRCodeActivity</string>
+    <string name="login_hint">使用QQ音乐手机端完成登录获取Openid OpenToken的例子\n
+        由于同一scheme在CallbackActivity和LoginExampleActivity都需要使用，避免混乱，AndroidManifest.xml中
+        默认将LoginExampleActivity的intent-filter注释，完整体验LoginExampleActivity前将其反注释，并将CallbackActivity的intent-filter注释进行注释"</string>
+    <string name="pcm_hint">1. 完成如[API调用方式](https://developer.y.qq.com/qplayaidl.html#/overview?id=二、api调用方式)中提及到的与QQMusicApiService的绑定流程。
+2. 调用`executeAsync("startPcmMode")`使QQ音乐进入Pcm模式，如QQ音乐正在播放中，会停止播放。Client在该方法中传入callback，等待QQ音乐解码Pcm数据时回调。
+3. QQ音乐开始播放时，Client可主动调用`execute("playMusic")`，QQ音乐会开始解码并在上一步骤的callback中返回mediaInfo以及pcmFileDescriptor，mediaInfo为Data.MediaInfo类型，提供播放器初始化时使用的参数，pcmFileDescriptor为ParcelFileDescriptor类型，为Pcm数据传输用的文件描述符。
+4. 读取pcmFileDescriptor对应的数据流数据进行播放。
+5. 使用完毕时，调用`execute("stopPcmMode")`结束Pcm模式。QQ音乐会停止正在播放的音乐。</string>
 </resources>

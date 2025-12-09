@@ -1,0 +1,21 @@
+<resources>
+    <string-array name="bind_platform_array">
+        <item>手机</item>
+        <item>TV</item>
+        <item>Car</item>
+        <item>Lite</item>
+        <item>Lite-demo</item>
+    </string-array>
+    <string-array name="sear_type">
+        <item>综合(new)</item>
+        <item>综合(old)</item>
+        <item>歌曲</item>
+        <item>歌单</item>
+        <item>专辑</item>
+        <item>相似歌曲推荐</item>
+        <item>视频(PHONE设备类型不支持)</item>
+        <item>歌手(PHONE设备类型不支持)</item>
+        <item>歌词(PHONE设备类型不支持)</item>
+        <item>用户(PHONE设备类型不支持)</item>
+    </string-array>
+</resources>
