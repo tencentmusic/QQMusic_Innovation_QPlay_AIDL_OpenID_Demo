@@ -278,7 +278,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     private fun startQQMusicProcess() {
         Log.d(TAG, "startQQMusicProcess: ")
-        CommonCmd.startQQMusicProcess(this, packageName, m_OpenAPIAppID)
+        CommonCmd.startQQMusicProcess(this, packageName, m_OpenAPIAppID, "hz_ss_mifastxazs")
     }
 
     private fun verifyCallerRequest() {
@@ -292,6 +292,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
             Config.OPENID_APPID,
             packageName,
             encryptString,
+            "hz_ss_mifastxazs",
             "qqmusicapidemo://xxx"
         )
     }
@@ -1565,7 +1566,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
         //Log.d(TAG, "sayHi ret:" + result?.getInt(Keys.API_RETURN_KEY_CODE))
 
         //qqmusicApi?.execute()
-        CommonCmd.startQQMusicProcess(this, this.packageName, m_OpenAPIAppID)
+        CommonCmd.startQQMusicProcess(this, this.packageName, m_OpenAPIAppID, "hz_ss_mifastxazs")
     }
 
     fun testPlayList(v: View) {

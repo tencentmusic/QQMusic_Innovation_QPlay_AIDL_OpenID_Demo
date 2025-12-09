@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Spinner
+            android:id="@+id/spinner_param_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btn_remove_param"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="删除"
+            android:textSize="12sp"
+            android:padding="4dp"
+            style="?android:attr/buttonBarButtonStyle" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/et_param_key"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="参数名 (key)"
+        android:layout_marginTop="4dp"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/et_param_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="参数值 (value)"
+        android:layout_marginTop="4dp"
+        android:minLines="1"
+        android:maxLines="5" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#E0E0E0" />
+
+</LinearLayout>

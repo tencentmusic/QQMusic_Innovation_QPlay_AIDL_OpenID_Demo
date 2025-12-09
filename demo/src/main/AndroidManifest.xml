@@ -3,6 +3,8 @@
     package="com.tencent.qqmusic.api.demo">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:allowBackup="true"
@@ -52,7 +54,8 @@
 
         <service
             android:name=".pcm.PlayerService"
-            android:process=".play" />
+            android:process=".play"
+            android:foregroundServiceType="mediaPlayback" />
         <activity
             android:name=".LoginExampleActivity"
             android:theme="@style/AppTheme.NoActionBar">

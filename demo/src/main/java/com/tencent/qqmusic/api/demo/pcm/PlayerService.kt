@@ -17,7 +17,6 @@ import com.tencent.qqmusic.api.demo.R
 import com.tencent.qqmusic.api.demo.openid.OpenIDHelper
 import com.tencent.qqmusic.api.demo.util.QPlayBindHelper
 import com.tencent.qqmusic.third.api.contract.*
-import kotlinx.android.synthetic.main.activity_visual.view.*
 
 
 /**
@@ -180,7 +179,7 @@ class PlayerService : Service() {
                 val result = qqMusicApi?.execute("playMusic", null)
                 val errorCode = result?.getInt(Keys.API_RETURN_KEY_CODE) ?: 0
                 if (errorCode != ErrorCodes.ERROR_OK) {
-                    Log.d(VisualActivity.TAG, "开始播放音乐失败($errorCode)")
+                    Log.d(TAG, "开始播放音乐失败($errorCode)")
                 }
             }
             audioManager?.play()
