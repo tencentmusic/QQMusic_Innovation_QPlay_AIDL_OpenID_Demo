@@ -278,7 +278,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
 
     private fun startQQMusicProcess() {
         Log.d(TAG, "startQQMusicProcess: ")
-        CommonCmd.startQQMusicProcess(this, packageName, m_OpenAPIAppID, "hz_ss_mifastxazs")
+        CommonCmd.startQQMusicProcess(this, packageName, m_OpenAPIAppID, m_OpenAPIAppID)
     }
 
     private fun verifyCallerRequest() {
