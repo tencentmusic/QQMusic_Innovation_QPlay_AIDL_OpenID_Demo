@@ -229,6 +229,11 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         btUnregister.setOnClickListener {
             qqmusicApi?.unregisterEventListener(arrayListOf(Events.API_EVENT_SONG_FAVORITE_STATE_CHANGED), eventListener)
         }
+
+        // 连续调用测试入口
+        findViewById<Button>(R.id.bt_chain_call).setOnClickListener {
+            startActivity(Intent(this, ChainCallActivity::class.java))
+        }
     }
 
     /**

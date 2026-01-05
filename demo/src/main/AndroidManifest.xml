@@ -52,6 +52,21 @@
             android:name=".pcm.PcmExampleActivityNew"
             android:theme="@style/AppTheme.NoActionBar"/>
 
+        <activity
+            android:name=".ChainCallActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".ApiListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".ApiDetailActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <service
             android:name=".pcm.PlayerService"
             android:process=".play"
