@@ -18,7 +18,7 @@ allprojects {
         mavenLocal()
         // SDK仓库
         maven {
-            url 'http://ct.y.qq.com/TVapp/nexus/repository/maven-public/'
+            url 'https://ct.y.qq.com/TVapp/nexus/repository/maven-public/'
             credentials {
                 username 'tvsdk_client'
                 password 'tvsdk-client'

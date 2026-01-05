@@ -13,6 +13,9 @@ class ExampleListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_example_list)
 
         val exampleList = listOf(
+            Example("API接口测试（新）") {
+                startActivity(Intent(this, ApiListActivity::class.java))
+            },
             Example("QPlayAidl基本功能及接口测试") {
                 startActivity(Intent(this, VisualActivity::class.java))
             },
@@ -22,8 +25,11 @@ class ExampleListActivity : AppCompatActivity() {
             Example("Pcm传输demo") {
                 startActivity(Intent(this, PcmExampleActivityNew::class.java))
             },
-            Example("进MainActivity") {
+            Example("旧版接口测试") {
                 startActivity(Intent(this, MainActivity::class.java))
+            },
+            Example("连续调用测试（独立）") {
+                startActivity(Intent(this, ChainCallActivity::class.java))
             }
         )
         lv_examples.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exampleList)

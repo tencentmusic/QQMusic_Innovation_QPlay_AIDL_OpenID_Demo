@@ -152,6 +152,22 @@
                 android:layout_height="wrap_content"
                 android:text="unregister" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="#E0E0E0" />
+
+            <Button
+                android:id="@+id/bt_chain_call"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="连续调用测试"
+                android:textColor="#1976D2" />
+
 
         </LinearLayout>
 

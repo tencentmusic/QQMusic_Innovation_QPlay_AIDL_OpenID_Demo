@@ -708,7 +708,7 @@ class VisualActivity : AppCompatActivity(), ServiceConnection {
                                         this.mainTitle = "每日30首"
                                     },
                                     Data.FolderInfo().apply {
-                                        this.isSongFolder = false
+                                        this.isSongFolder = true
                                         this.id="99|10004"
                                         this.type = Data.FolderType.PERSONAL_RADIO_FOLDER_SONG_LIST
                                         this.mainTitle = "个性电台"
